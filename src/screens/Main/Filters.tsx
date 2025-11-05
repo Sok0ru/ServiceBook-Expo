@@ -59,7 +59,7 @@
         time: {
         enabled: false,
         min: '5',
-        max: '1000000',
+        max: '100',
         selectedLine: 0, // 0: Менее 10 дней, 1: Менее 1 мес., 2: Менее 3 мес., 3: Менее 4 мес.
         },
     });
@@ -86,7 +86,7 @@
         test: { enabled: true, usbBsaSs: false },
         mileage: { enabled: true, min: '10001000', max: '10001000', selectedLine: 0 },
         condition: { enabled: true, Критично: false, Внимание: false, Исправно: false },
-        time: { enabled: false, min: '5', max: '1000000', selectedLine: 0 },
+        time: { enabled: false, min: '5', max: '100', selectedLine: 0 },
         });
     };
 
@@ -429,7 +429,7 @@
     filterTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#f3f3f3ff',
+        color: '#1a1a1a',
         marginLeft: 12,
     },
     optionsContainer: {

@@ -168,7 +168,7 @@
             {/* Кнопка создания нового напоминания */}
             <TouchableOpacity 
             style={styles.createButton}
-            onPress={() => navigation.navigate('CreateReminder')}
+            onPress={() => navigation.navigate('CreateReminder')} 
             >
             <Text style={styles.createButtonText}>+ Создать напоминание</Text>
             </TouchableOpacity>

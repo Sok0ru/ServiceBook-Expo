@@ -90,7 +90,7 @@
             <View style={styles.quickActions}>
             <TouchableOpacity 
                 style={styles.quickActionButton}
-                onPress={() => navigation.navigate('Reminders')}
+                onPress={() => navigation.navigate('CreateReminder')}
             >
                 <Text style={styles.quickActionText}>Добавить напоминание</Text>
             </TouchableOpacity>

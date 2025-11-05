@@ -28,7 +28,7 @@
     export default function CarDetails({ navigation }: Props) {
     const carData = {
         model: 'SUBARU FORESTER',
-        plate: 'Е271КМ122',
+        plate: 'Й312ОУ154',
         vin: 'vinnebude',
         mileage: '121404 км',
         components: [
@@ -112,6 +112,10 @@
     content: {
         flex: 1,
         padding: 16,
+    },
+    scrollContent: {
+        padding: 16,
+        paddingBottom: 100, 
     },
     carHeader: {
         backgroundColor: '#f3f3f3ff',
@@ -227,5 +231,8 @@
         fontWeight: '500',
         color: '#007AFF',
         textAlign: 'center',
+    },
+    bottomSpacer: {
+        height: 20, 
     },
     });

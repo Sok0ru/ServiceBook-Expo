@@ -145,7 +145,7 @@
                     trackColor={{ false: '#767577', true: '#81b0ff' }}
                     thumbColor={filters.test.enabled ? '#007AFF' : '#f4f3f4'}
                 />
-                <Text style={styles.filterTitle}>Тет</Text>
+                <Text style={styles.filterTitle}>Теги</Text>
                 </View>
             </View>
             

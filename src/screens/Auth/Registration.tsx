@@ -85,15 +85,11 @@
             <View style={styles.checkboxContainer}>
                 <View style={styles.checkboxItem}>
                 <View style={styles.checkbox} />
-                <Text style={styles.checkboxText}>Слыш.</Text>
+                <Text style={styles.checkboxText}>Прочитал ненужные документы</Text>
                 </View>
                 <View style={styles.checkboxItem}>
                 <View style={styles.checkbox} />
-                <Text style={styles.checkboxText}>Веро.</Text>
-                </View>
-                <View style={styles.checkboxItem}>
-                <View style={styles.checkbox} />
-                <Text style={styles.checkboxText}>Святое письмо.</Text>
+                <Text style={styles.checkboxText}>Соглашение на рассылку</Text>
                 </View>
             </View>
 

@@ -49,8 +49,9 @@
             onPress={() => navigation.navigate('CarDetails')}
             >
             <Text style={styles.carTitle}>SUBARU FORESTER</Text>
-            <Text style={styles.carInfo}>Е271КМ122 121404км</Text>
-            <Text style={styles.carInfo}>vinanebude</Text>
+            <Text style={styles.carInfo}>Гос. знак: Й312ОУ154</Text>
+            <Text style={styles.carInfo}>VIN: vinanebude</Text>
+            <Text style={styles.carInfo}>пробег: 121404км</Text>
             
             {/* Issues Section */}
             <View style={styles.issuesSection}>

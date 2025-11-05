@@ -13,12 +13,12 @@
         {
         id: '1',
         model: 'SUBARU FORESTER',
-        plate: 'K7770T555',
+        plate: 'Й312ОУ154',
         mileage: '121404 км',
         },
         {
         id: '2', 
-        model: 'TOYOTA CAMRY',
+        model: 'TOYOTA CAM',
         plate: 'A123BC777',
         mileage: '85600 км',
         },

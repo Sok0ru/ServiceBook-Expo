@@ -1,18 +1,21 @@
     import React from 'react';
     import { View, Text, StyleSheet } from 'react-native';
+    import { Ionicons } from '@expo/vector-icons';
 
     type TabBarIconProps = {
     focused: boolean;
     title: string;
+    iconName: keyof typeof Ionicons.glyphMap;
     };
 
-    export default function TabBarIcon({ focused, title }: TabBarIconProps) {
+    export default function TabBarIcon({ focused, title, iconName }: TabBarIconProps) {
     return (
         <View style={styles.container}>
-        <View style={[
-            styles.icon,
-            focused && styles.iconFocused
-        ]} />
+        <Ionicons 
+            name={iconName} 
+            size={24} 
+            color={focused ? '#007AFF' : '#666'} 
+        />
         <Text style={[
             styles.text,
             focused && styles.textFocused
@@ -29,20 +32,11 @@
         justifyContent: 'center',
         paddingVertical: 8,
     },
-    icon: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#ccc',
-        marginBottom: 4,
-    },
-    iconFocused: {
-        backgroundColor: '#007AFF',
-    },
     text: {
         fontSize: 12,
         color: '#666',
         fontWeight: '500',
+        marginTop: 4,
     },
     textFocused: {
         color: '#007AFF',

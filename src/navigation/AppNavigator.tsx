@@ -1,25 +1,42 @@
     import React from 'react';
     import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+    import { Dimensions } from 'react-native';
     import Dashboard from '../screens/Main/Dashboard';
     import Garage from '../screens/Main/Garage';
     import History from '../screens/Main/History';
     import Settings from '../screens/Main/Settings';
-    import TabBarIcon from '../components/TabBarIcon';
+    import HybridTabIcon from '../components/HybridTabIcon';
 
     const Tab = createBottomTabNavigator();
+    const { width: screenWidth } = Dimensions.get('window');
 
     export default function AppNavigator() {
     return (
         <Tab.Navigator
         screenOptions={{
             headerShown: false,
+            tabBarShowLabel: false,
             tabBarStyle: {
             backgroundColor: 'white',
-            borderTopWidth: 1,
-            borderTopColor: '#e0e0e0',
+            borderTopWidth: 0,
             height: 80,
-            paddingBottom: 16,
-            paddingTop: 8,
+            paddingBottom: 10,
+            paddingTop: 10,
+            position: 'absolute',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 8,
+            borderRadius: 16,
+            marginHorizontal: 0,
+            marginBottom: 0,
+            width: screenWidth,
+            },
+            tabBarItemStyle: {
+            paddingVertical: 6,
+            paddingHorizontal: 2,
+                  width: screenWidth  / 4 + 10,
             },
         }}
         >
@@ -28,7 +45,12 @@
             component={Dashboard}
             options={{
             tabBarIcon: ({ focused }) => (
-                <TabBarIcon focused={focused} title="Главная" />
+                <HybridTabIcon 
+                focused={focused}
+                label="Главная"
+                iconType="home" 
+                size={24}
+                />
             ),
             }}
         />
@@ -37,7 +59,12 @@
             component={Garage}
             options={{
             tabBarIcon: ({ focused }) => (
-                <TabBarIcon focused={focused} title="Гараж" />
+                <HybridTabIcon 
+                focused={focused}
+                label="Гараж"
+                iconType="garage"
+                size={24}
+                />
             ),
             }}
         />
@@ -46,7 +73,12 @@
             component={History}
             options={{
             tabBarIcon: ({ focused }) => (
-                <TabBarIcon focused={focused} title="История" />
+                <HybridTabIcon 
+                focused={focused}
+                label="История"
+                iconType="history" 
+                size={24}
+                />
             ),
             }}
         />
@@ -55,7 +87,12 @@
             component={Settings}
             options={{
             tabBarIcon: ({ focused }) => (
-                <TabBarIcon focused={focused} title="Настройки" />
+                <HybridTabIcon 
+                focused={focused}
+                label="Настройки"
+                iconType="settings" 
+                size={24}
+                />
             ),
             }}
         />

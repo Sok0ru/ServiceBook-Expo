@@ -16,6 +16,7 @@
   // Импорт главного навигатора с табами
   import AppNavigator from './src/navigation/AppNavigator';
   import CreateReminder from './src/screens/Main/CreateReminder';
+  import History from './src/screens/Main/History';
 
   const Stack = createNativeStackNavigator();
 
@@ -51,6 +52,11 @@
             name="CreateReminder" 
             component={CreateReminder}
             options={{ title: 'Создать напоминание' }}
+          />
+          <Stack.Screen 
+            name="History" 
+            component={History}
+            options={{ title: 'История' }}
           />
           {/* Экраны, которые открываются поверх табов */}
           <Stack.Screen 

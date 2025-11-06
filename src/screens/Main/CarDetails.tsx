@@ -95,7 +95,10 @@
                 <Text style={styles.quickActionText}>Добавить напоминание</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.quickActionButton}>
+            <TouchableOpacity 
+                style={styles.quickActionButton}
+                onPress={() => navigation.navigate('History')}
+                >
                 <Text style={styles.quickActionText}>История обслуживания</Text>
             </TouchableOpacity>
             </View>

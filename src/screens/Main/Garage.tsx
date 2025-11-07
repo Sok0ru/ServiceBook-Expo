@@ -40,7 +40,10 @@
             </TouchableOpacity>
             ))}
 
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AddCar')}
+            >
             <Text style={styles.addButtonText}>+ Добавить автомобиль</Text>
             </TouchableOpacity>
         </ScrollView>

@@ -7,11 +7,12 @@
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context'; 
     import { StackNavigationProp } from '@react-navigation/stack';
+    import AuthIcon from '../../components/AuthIconPng';
 
     type AuthStackParamList = {
     EmailVerification: undefined;
     Login: undefined;
-    Dashboard: undefined;
+    MainTabs: undefined;
     };
 
     type EmailVerificationScreenNavigationProp = StackNavigationProp<
@@ -38,6 +39,10 @@
             >
             <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
             </TouchableOpacity>
+
+            <View style={styles.iconContainer}>
+            <AuthIcon size={150} />
+            </View>
         </View>
         </SafeAreaView>
     );
@@ -45,18 +50,20 @@
 
     const styles = StyleSheet.create({
     container: {
+        paddingTop:100,
         flex: 1,
-        backgroundColor: '#f3f3f3ff',
+        backgroundColor: '#ffffff',
     },
     content: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'space-between', 
         alignItems: 'center',
         padding: 24,
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
+        marginTop: 40, 
         marginBottom: 16,
         color: '#1a1a1a',
     },
@@ -64,7 +71,7 @@
         fontSize: 16,
         textAlign: 'center',
         marginBottom: 48,
-        color: '#1a1a1a',
+        color: '#666666',
         lineHeight: 22,
     },
     button: {
@@ -84,8 +91,15 @@
         elevation: 5,
     },
     buttonText: {
-        color: '#1a1a1a',
+        color: 'white',
         fontSize: 16,
         fontWeight: '600',
+    },
+    iconContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: 100,
+        marginBottom: 40, 
     },
     });

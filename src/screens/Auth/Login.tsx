@@ -10,6 +10,7 @@
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import AuthIcon from '../../components/AuthIconPng';
 
     type AuthStackParamList = {
     EmailVerification: undefined;
@@ -36,35 +37,43 @@
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.content}
         >
-            <Text style={styles.title}>ServiceBook</Text>
-            
-            <TextInput
-            style={styles.input}
-            placeholder="ПАРОЛЬ"
-            placeholderTextColor="#999"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            />
-            
-            <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>ЗАБЫЛИ ПАРОЛЬ</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-            style={[styles.button, !password && styles.buttonDisabled]}
-            onPress={() => navigation.navigate('MainTabs')} // ИЗМЕНИЛИ НА MainTabs
-            disabled={!password}
-            >
-            <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity 
-            style={styles.secondaryButton}
-            onPress={() => navigation.navigate('Registration')}
-            >
-            <Text style={styles.secondaryButtonText}>РЕГИСТРАЦИЯ</Text>
-            </TouchableOpacity>
+            <View style={styles.topSection}>
+                <Text style={styles.title}>ServiceBook</Text>
+                
+                <TextInput
+                style={styles.input}
+                placeholder="ПАРОЛЬ"
+                placeholderTextColor="#999"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                />
+                
+                <TouchableOpacity style={styles.forgotPassword}>
+                <Text style={styles.forgotPasswordText}>ЗАБЫЛИ ПАРОЛЬ</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                style={[styles.button, !password && styles.buttonDisabled]}
+                onPress={() => navigation.navigate('MainTabs')}
+                disabled={!password}
+                >
+                <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                style={styles.secondaryButton}
+                onPress={() => navigation.navigate('Registration')}
+                >
+                <Text style={styles.secondaryButtonText}>РЕГИСТРАЦИЯ</Text>
+                </TouchableOpacity>
+            </View>
+
+                <View style={styles.iconContainer}>
+                <AuthIcon size={150} />
+                </View>
+
         </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -72,13 +81,18 @@
 
     const styles = StyleSheet.create({
     container: {
+        paddingTop:100,
+        padding: 24,
         flex: 1,
-        backgroundColor: '#f3f3f3ff',
+        backgroundColor: '#ffffff',
     },
     content: {
+        paddingTop:100,
+        flex: 1,
+    },
+    topSection: {
         flex: 1,
         justifyContent: 'center',
-        padding: 24,
     },
     title: {
         fontSize: 28,
@@ -125,7 +139,7 @@
         elevation: 0,
     },
     buttonText: {
-        color: '#1a1a1a',
+        color: 'white',
         fontSize: 16,
         fontWeight: '600',
     },
@@ -141,6 +155,10 @@
         color: '#007AFF',
         fontSize: 16,
         fontWeight: '600',
-  },
-
+    },
+    iconContainer: {
+        alignItems: 'center',
+        marginTop: 0,
+        marginBottom: 20,
+    },
     });

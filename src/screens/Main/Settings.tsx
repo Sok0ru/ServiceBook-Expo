@@ -17,50 +17,52 @@
             <Text style={styles.subtitle}>Настройки приложения</Text>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Профиль */}
-            <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ПРОФИЛЬ</Text>
-            <TouchableOpacity style={styles.settingItem}>
-                <Text style={styles.settingText}>Личные данные</Text>
-                <Text style={styles.settingArrow}>›</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.settingItem}>
-                <Text style={styles.settingText}>Уведомления</Text>
-                <Text style={styles.settingArrow}>›</Text>
-            </TouchableOpacity>
-            </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.content}>
+                {/* Профиль */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>ПРОФИЛЬ</Text>
+                    <TouchableOpacity style={styles.settingItem}>
+                        <Text style={styles.settingText}>Личные данные</Text>
+                        <Text style={styles.settingArrow}>›</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.settingItem}>
+                        <Text style={styles.settingText}>Уведомления</Text>
+                        <Text style={styles.settingArrow}>›</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {/* Приложение */}
-            <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ПРИЛОЖЕНИЕ</Text>
-            <View style={styles.settingItem}>
-                <Text style={styles.settingText}>Темная тема</Text>
-                <Switch value={false} />
-            </View>
-            <TouchableOpacity style={styles.settingItem}>
-                <Text style={styles.settingText}>Язык</Text>
-                <Text style={styles.settingValue}>Русский</Text>
-            </TouchableOpacity>
-            </View>
+                {/* Приложение */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>ПРИЛОЖЕНИЕ</Text>
+                    <View style={styles.settingItem}>
+                        <Text style={styles.settingText}>Темная тема</Text>
+                        <Switch value={false} />
+                    </View>
+                    <TouchableOpacity style={styles.settingItem}>
+                        <Text style={styles.settingText}>Язык</Text>
+                        <Text style={styles.settingValue}>Русский</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {/* О приложении */}
-            <View style={styles.section}>
-            <Text style={styles.sectionTitle}>О ПРИЛОЖЕНИИ</Text>
-            <TouchableOpacity style={styles.settingItem}>
-                <Text style={styles.settingText}>Версия</Text>
-                <Text style={styles.settingValue}>1.0.0</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.settingItem}>
-                <Text style={styles.settingText}>Политика конфиденциальности</Text>
-                <Text style={styles.settingArrow}>›</Text>
-            </TouchableOpacity>
-            </View>
+                {/* О приложении */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>О ПРИЛОЖЕНИИ</Text>
+                    <TouchableOpacity style={styles.settingItem}>
+                        <Text style={styles.settingText}>Версия</Text>
+                        <Text style={styles.settingValue}>1.0.0</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.settingItem}>
+                        <Text style={styles.settingText}>Политика конфиденциальности</Text>
+                        <Text style={styles.settingArrow}>›</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {/* Выход */}
-            <TouchableOpacity style={styles.logoutButton}>
-            <Text style={styles.logoutButtonText}>Выйти из аккаунта</Text>
-            </TouchableOpacity>
+                {/* Выход */}
+                <TouchableOpacity style={styles.logoutButton}>
+                    <Text style={styles.logoutButtonText}>Выйти из аккаунта</Text>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
         </SafeAreaView>
     );
@@ -88,13 +90,18 @@
         color: '#666',
     },
     content: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'auto',
         flex: 1,
         padding: 16,
+        gap: 16,
+        overflow: 'hidden',
     },
     section: {
         backgroundColor: 'white',
         borderRadius: 12,
-        marginBottom: 16,
+        //marginBottom: 16,
         padding: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },

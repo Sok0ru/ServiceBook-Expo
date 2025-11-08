@@ -17,7 +17,7 @@
     // Ionicons для остальных вкладок
     const IoniconsIcons = {
     garage: {
-        active: 'car-sport' as keyof typeof Ionicons.glyphMap,
+        active: 'car-sport-outline' as keyof typeof Ionicons.glyphMap,
         inactive: 'car-sport-outline' as keyof typeof Ionicons.glyphMap
     },
     history: {
@@ -25,7 +25,7 @@
         inactive: 'time-outline' as keyof typeof Ionicons.glyphMap
     },
     settings: {
-        active: 'settings' as keyof typeof Ionicons.glyphMap,
+        active: 'settings-outline' as keyof typeof Ionicons.glyphMap,
         inactive: 'settings-outline' as keyof typeof Ionicons.glyphMap
     }
     };

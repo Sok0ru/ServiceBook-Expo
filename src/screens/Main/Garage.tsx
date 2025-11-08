@@ -5,8 +5,12 @@
     StyleSheet,
     TouchableOpacity,
     ScrollView,
+    Dimensions,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
+    import { wp, hp, fontSize, spacing, isTablet } from '../../utils/responsive';
+
+    const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
     export default function Garage(props: any) {
     const { navigation } = props;
@@ -26,6 +30,8 @@
         },
     ];
 
+    const numColumns = isTablet ? 2 : 1;
+
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
@@ -33,28 +39,40 @@
             <Text style={styles.subtitle}>Ваши автомобили</Text>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Список автомобилей */}
+        <ScrollView 
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+        >
+            {/* Список автомобилей с адаптивной сеткой */}
+            <View style={[styles.carsContainer, { flexDirection: isTablet ? 'row' : 'column', flexWrap: isTablet ? 'wrap' : 'nowrap' }]}>
             {cars.map((car) => (
-            <TouchableOpacity 
+                <View 
                 key={car.id} 
-                style={styles.carCard}
-                onPress={() => navigation.navigate('CarDetails')}
-            >
-                <Text style={styles.carModel}>{car.model}</Text>
-                <Text style={styles.carPlate}>{car.plate}</Text>
-                <Text style={styles.carMileage}>{car.mileage}</Text>
-                
-                {/* Статус автомобиля */}
-                <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>Активный</Text>
+                style={[
+                    styles.carCardWrapper,
+                    isTablet && { width: '48%', marginRight: '4%', marginBottom: spacing.md }
+                ]}
+                >
+                <TouchableOpacity 
+                    style={styles.carCard}
+                    onPress={() => navigation.navigate('CarDetails')}
+                >
+                    <Text style={styles.carModel}>{car.model}</Text>
+                    <Text style={styles.carPlate}>{car.plate}</Text>
+                    <Text style={styles.carMileage}>{car.mileage}</Text>
+                    
+                    <View style={styles.statusBadge}>
+                    <Text style={styles.statusText}>Активный</Text>
+                    </View>
+                </TouchableOpacity>
                 </View>
-            </TouchableOpacity>
             ))}
+            </View>
 
             {/* Кнопка добавления автомобиля */}
             <TouchableOpacity 
-            style={[styles.addButton, { backgroundColor: '#32CD32' }]}
+            style={styles.addButton}
             onPress={() => navigation.navigate('AddCar')}
             >
             <Text style={styles.addButtonText}>+ Добавить автомобиль</Text>
@@ -66,14 +84,14 @@
                 style={styles.actionButton}
                 onPress={() => navigation.navigate('Reminders')}
             >
-                <Text style={styles.actionButtonText}>Напоминания</Text>
+                <Text style={styles.actionButtonText}> Напоминания</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
                 style={styles.actionButton}
                 onPress={() => navigation.navigate('History')}
             >
-                <Text style={styles.actionButtonText}>История обслуживания</Text>
+                <Text style={styles.actionButtonText}> История обслуживания</Text>
             </TouchableOpacity>
             </View>
 
@@ -96,71 +114,85 @@
         backgroundColor: '#f5f5f5',
     },
     header: {
-        padding: 20,
+        paddingVertical: hp(2.5),
+        paddingHorizontal: wp(5),
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
     },
     title: {
-        fontSize: 28,
+        fontSize: fontSize(28),
         fontWeight: 'bold',
         color: '#1a1a1a',
-        marginBottom: 8,
+        marginBottom: hp(1),
+        textAlign: 'center',
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: fontSize(16),
         color: '#666',
+        textAlign: 'center',
     },
     content: {
         flex: 1,
-        padding: 16,
+    },
+    scrollContent: {
+        paddingHorizontal: wp(4),
+        paddingVertical: hp(2),
+    },
+    carsContainer: {
+        marginBottom: hp(2),
+    },
+    carCardWrapper: {
+        marginBottom: hp(1.5),
     },
     carCard: {
         backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 16,
-        marginBottom: 12,
+        padding: wp(4),
+        borderRadius: wp(4),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
         position: 'relative',
+        minHeight: hp(12),
     },
     carModel: {
-        fontSize: 18,
+        fontSize: fontSize(18),
         fontWeight: 'bold',
         color: '#1a1a1a',
-        marginBottom: 4,
+        marginBottom: hp(0.5),
     },
     carPlate: {
-        fontSize: 16,
+        fontSize: fontSize(16),
         color: '#666',
-        marginBottom: 4,
+        marginBottom: hp(0.5),
     },
     carMileage: {
-        fontSize: 14,
+        fontSize: fontSize(14),
         color: '#999',
     },
     statusBadge: {
         position: 'absolute',
-        top: 16,
-        right: 16,
+        top: wp(4),
+        right: wp(4),
         backgroundColor: '#E8F5E8',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingHorizontal: wp(3),
+        paddingVertical: hp(0.5),
+        borderRadius: wp(3),
     },
     statusText: {
-        fontSize: 12,
+        fontSize: fontSize(12),
         color: '#2E7D32',
         fontWeight: '500',
     },
     addButton: {
-        padding: 16,
-        borderRadius: 12,
+        backgroundColor: '#32CD32',
+        paddingVertical: hp(2),
+        paddingHorizontal: wp(4),
+        borderRadius: wp(3),
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: hp(2),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -169,49 +201,51 @@
     },
     addButtonText: {
         color: 'white',
-        fontSize: 16,
+        fontSize: fontSize(16),
         fontWeight: '600',
     },
     actionsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 16,
-        gap: 12,
+        marginBottom: hp(2),
+        gap: wp(3),
     },
     actionButton: {
         flex: 1,
         backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 12,
+        padding: wp(4),
+        borderRadius: wp(3),
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
+        minHeight: hp(8),
+        justifyContent: 'center',
     },
     actionButtonText: {
-        fontSize: 14,
+        fontSize: fontSize(14),
         color: '#007AFF',
         fontWeight: '500',
         textAlign: 'center',
     },
     infoCard: {
         backgroundColor: '#E3F2FD',
-        padding: 16,
-        borderRadius: 12,
-        borderLeftWidth: 4,
+        padding: wp(4),
+        borderRadius: wp(3),
+        borderLeftWidth: wp(1),
         borderLeftColor: '#2196F3',
     },
     infoTitle: {
-        fontSize: 16,
+        fontSize: fontSize(16),
         fontWeight: '600',
         color: '#1976D2',
-        marginBottom: 8,
+        marginBottom: hp(1),
     },
     infoText: {
-        fontSize: 14,
+        fontSize: fontSize(14),
         color: '#424242',
-        lineHeight: 20,
+        lineHeight: fontSize(20),
     },
     });

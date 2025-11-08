@@ -6,27 +6,15 @@
     TouchableOpacity,
     StyleSheet,
     StatusBar,
+    Dimensions,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
-    import { StackNavigationProp } from '@react-navigation/stack';
+    import { wp, hp, fontSize, spacing, isTablet } from '../../utils/responsive';
 
-    type MainStackParamList = {
-        Dashboard: undefined;
-        CarDetails: undefined;
-        Reminders: undefined;
-        Filters: undefined;
-    };
+    const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-    type DashboardScreenNavigationProp = StackNavigationProp<
-        MainStackParamList,
-    'Dashboard'
-    >;
-
-    type Props = {
-        navigation: DashboardScreenNavigationProp;
-    };  
-
-    export default function Dashboard({ navigation }: Props) {
+    export default function Dashboard(props: any) {
+    const { navigation } = props;
     const currentTime = new Date().toLocaleTimeString('ru-RU', {
         hour: '2-digit',
         minute: '2-digit'
@@ -36,32 +24,28 @@
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <StatusBar barStyle="dark-content" />
         
-        {/* Header */}
         <View style={styles.header}>
             <Text style={styles.title}>Главная</Text>
         </View>
 
-        {/* Content */}
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Car Card */}
+            {/* Карта бибики */}
             <TouchableOpacity 
             style={styles.carCard}
             onPress={() => navigation.navigate('CarDetails')}
             >
             <Text style={styles.carTitle}>SUBARU FORESTER</Text>
-            <Text style={styles.carInfo}>Гос. знак: Й312ОУ154</Text>
-            <Text style={styles.carInfo}>VIN: vinanebude</Text>
-            <Text style={styles.carInfo}>пробег: 121404км</Text>
+            <Text style={styles.carInfo}>K7770T555 121404</Text>
+            <Text style={styles.carInfo}>asdftrewhjk1238c</Text>
             
-            {/* Issues Section */}
             <View style={styles.issuesSection}>
                 <Text style={styles.sectionTitle}>КОМПОНЕНТЫ</Text>
                 
                 {[
-                { name: 'Форсунки', status: 'требуется замена или ремонт' },
+                { name: 'Амортизатор', status: 'требуется замена или ремонт' },
                 { name: 'Соленоид', status: 'требуется замена или ремонт' },
                 { name: 'Ступица', status: 'требуется замена или ремонт' },
-                { name: 'Крестовина кардана', status: 'требуется замена или ремонт' },
+                { name: 'Кардан', status: 'требуется замена или ремонт' },
                 ].map((issue, index) => (
                 <View key={index} style={styles.issueItem}>
                     <Text style={styles.issueText}>{issue.name}</Text>
@@ -74,7 +58,7 @@
             <View style={styles.criticalSection}>
                 <Text style={styles.criticalTitle}>КРИТИЧНО</Text>
                 <Text style={styles.criticalSubtitle}>ТРЕБУЕТ ВНИМАНИЯ</Text>
-                <Text style={styles.criticalInfo}>1233211 км</Text>
+                <Text style={styles.criticalInfo}>1233211</Text>
                 <Text style={styles.criticalLink}>www.service-info.com</Text>
             </View>
             </TouchableOpacity>
@@ -95,6 +79,9 @@
                 <Text style={styles.actionText}>Фильтры</Text>
             </TouchableOpacity>
             </View>
+
+            
+            <View style={{ height: hp(10) }} />
         </ScrollView>
         </SafeAreaView>
     );
@@ -103,35 +90,37 @@
     const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f3f3f3ff',
+        backgroundColor: '#f5f5f5',
     },
     header: {
-        padding: 20,
-        backgroundColor: '#f3f3f3ff',
+        paddingVertical: hp(2),
+        paddingHorizontal: wp(5),
+        backgroundColor: 'white',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderBottomColor: '#f3f3f3ff',
+        borderBottomColor: '#e0e0e0',
     },
     time: {
-        fontSize: 16,
+        fontSize: fontSize(16),
         color: '#666',
-        marginBottom: 4,
+        marginBottom: hp(0.5),
     },
     title: {
-        fontSize: 20,
+        fontSize: fontSize(20),
         fontWeight: 'bold',
-        color: '#0f0f0fff',
+        color: '#1a1a1a',
     },
     content: {
         flex: 1,
-        padding: 16,
+        paddingHorizontal: wp(4),
+        paddingVertical: hp(2),
     },
     carCard: {
-        backgroundColor: '#f3f3f3ff',
-        padding: 20,
-        borderRadius: 16,
-        marginBottom: 16,
-        shadowColor: '#f3f3f3ff',
+        backgroundColor: 'white',
+        padding: wp(5),
+        borderRadius: wp(4),
+        marginBottom: hp(2),
+        shadowColor: '#000',
         shadowOffset: {
         width: 0,
         height: 2,
@@ -141,84 +130,84 @@
         elevation: 3,
     },
     carTitle: {
-        fontSize: 20,
+        fontSize: fontSize(20),
         fontWeight: 'bold',
-        marginBottom: 8,
+        marginBottom: hp(1),
         color: '#1a1a1a',
     },
     carInfo: {
-        fontSize: 14,
-        color: '#1a1a1a',
-        marginBottom: 4,
+        fontSize: fontSize(14),
+        color: '#666',
+        marginBottom: hp(0.5),
     },
     issuesSection: {
-        marginTop: 20,
-        paddingTop: 20,
+        marginTop: hp(2),
+        paddingTop: hp(2),
         borderTopWidth: 1,
-        borderTopColor: '#1a1a1a',
+        borderTopColor: '#f0f0f0',
     },
     sectionTitle: {
-        fontSize: 16,
+        fontSize: fontSize(16),
         fontWeight: 'bold',
-        marginBottom: 12,
+        marginBottom: hp(1.5),
         color: '#1a1a1a',
     },
     issueItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
-        paddingVertical: 4,
+        marginBottom: hp(1),
+        paddingVertical: hp(0.5),
     },
     issueText: {
         flex: 1,
-        fontSize: 14,
-        color: '#1a1a1a',
+        fontSize: fontSize(14),
+        color: '#333',
     },
     issueStatus: {
-        fontSize: 12,
+        fontSize: fontSize(12),
         color: '#FF3B30',
         fontWeight: '500',
     },
     criticalSection: {
-        marginTop: 20,
-        padding: 16,
+        marginTop: hp(2),
+        padding: wp(4),
         backgroundColor: '#FFE5E5',
-        borderRadius: 12,
-        borderLeftWidth: 4,
+        borderRadius: wp(3),
+        borderLeftWidth: wp(1),
         borderLeftColor: '#FF3B30',
     },
     criticalTitle: {
-        fontSize: 16,
+        fontSize: fontSize(16),
         fontWeight: 'bold',
         color: '#FF3B30',
-        marginBottom: 4,
+        marginBottom: hp(0.5),
     },
     criticalSubtitle: {
-        fontSize: 14,
+        fontSize: fontSize(14),
         color: '#FF3B30',
-        marginBottom: 8,
+        marginBottom: hp(1),
     },
     criticalInfo: {
-        fontSize: 12,
+        fontSize: fontSize(12),
         color: '#666',
-        marginBottom: 4,
+        marginBottom: hp(0.5),
     },
     criticalLink: {
-        fontSize: 12,
+        fontSize: fontSize(12),
         color: '#007AFF',
     },
     quickActions: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 8,
+        gap: wp(3),
     },
     actionButton: {
         flex: 1,
-        backgroundColor: '#1a1a1a',
-        padding: 16,
-        borderRadius: 12,
-        marginHorizontal: 4,
+        backgroundColor: 'white',
+        padding: wp(4),
+        borderRadius: wp(3),
+        marginHorizontal: wp(0.5),
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
@@ -228,10 +217,13 @@
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
+        minHeight: hp(8),
+        justifyContent: 'center',
     },
     actionText: {
-        fontSize: 14,
+        fontSize: fontSize(14),
         fontWeight: '500',
-        color: '#f3f3f3ff',
+        color: '#007AFF',
+        textAlign: 'center',
     },
     });

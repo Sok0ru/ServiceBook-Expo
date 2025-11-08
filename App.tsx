@@ -21,6 +21,7 @@
   import CarModels from './src/screens/Garage/CarModels';
   import CarGeneration from './src/screens/Garage/CarGeneration';
   import CarDetailsForm from './src/screens/Garage/CarDetailsForm';
+  import TestAddCar from './src/screens/Garage/TestAddCar';
 
   // Import main navigator
   import AppNavigator from './src/navigation/AppNavigator';
@@ -96,6 +97,11 @@
             name="AddCar" 
             component={AddCar}
             options={{ title: 'Добавить автомобиль' }}
+          />
+          <Stack.Screen 
+            name="TestAddCar" 
+            component={TestAddCar}
+            options={{ title: 'Тест навигации' }}
           />
           <Stack.Screen 
             name="CarModels" 

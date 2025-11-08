@@ -6,14 +6,13 @@
     FlatList,
     TouchableOpacity,
     StyleSheet,
-    ActivityIndicator,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
 
-    // Упрощенная версия без сложных типов
-    export default function AddCar({ navigation }: any) {
+    export default function AddCar(props: any) {
+    const { navigation } = props;
     const [searchQuery, setSearchQuery] = useState('');
-    const [brands, setBrands] = useState([
+    const [brands] = useState([
         { id: '1', name: 'Audi' },
         { id: '2', name: 'BMW' },
         { id: '3', name: 'Mercedes-Benz' },
@@ -25,8 +24,7 @@
         { id: '9', name: 'Kia' },
         { id: '10', name: 'Subaru' },
     ]);
-    const [filteredBrands, setFilteredBrands] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [filteredBrands, setFilteredBrands] = useState(brands);
 
     useEffect(() => {
         const filtered = brands.filter(brand =>
@@ -36,8 +34,6 @@
     }, [searchQuery, brands]);
 
     const handleBrandSelect = (brand: any) => {
-        console.log('Selected brand:', brand.name);
-        // navigation.navigate('CarModels', { brand: brand.name });
         alert(`Выбрана марка: ${brand.name}`);
     };
 

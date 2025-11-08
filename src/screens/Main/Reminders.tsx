@@ -185,6 +185,7 @@
     content: {
         flex: 1,
         padding: 16,
+        paddingTop: 0, 
     },
     header: {
         marginBottom: 24,

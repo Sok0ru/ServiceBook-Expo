@@ -183,7 +183,6 @@
         backgroundColor: '#f3f3f3ff',
     },
     content: {
-        
         flex: 1,
         padding: 16,
         paddingTop: 0, 

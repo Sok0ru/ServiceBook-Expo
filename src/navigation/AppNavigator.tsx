@@ -6,10 +6,9 @@
     import History from '../screens/Main/History';
     import Settings from '../screens/Main/Settings';
     import HybridTabIcon from '../components/HybridTabIcon';
-    import { wp, hp, isTablet } from '../utils/responsive';
 
     const Tab = createBottomTabNavigator();
-    const { width: SCREEN_WIDTH } = Dimensions.get('window');
+    const { width: screenWidth } = Dimensions.get('window');
 
     export default function AppNavigator() {
     return (
@@ -20,19 +19,24 @@
             tabBarStyle: {
             backgroundColor: 'white',
             borderTopWidth: 0,
-            height: isTablet ? hp(12) : hp(10), 
-            paddingBottom: isTablet ? hp(3) : hp(2),
-            paddingTop: isTablet ? hp(2) : hp(1.5),
+            height: 80,
+            paddingBottom: 10,
+            paddingTop: 10,
             position: 'absolute',
-            //borderRadius: isTablet ? wp(6) : wp(4),
-            marginHorizontal: isTablet ? wp(3) : wp(2.5),
-            //marginBottom: isTablet ? hp(2) : hp(1.5),
-            width: SCREEN_WIDTH - (isTablet ? wp(6) : wp(5)),
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 8,
+            borderRadius: 16,
+            marginHorizontal: 0,
+            marginBottom: 0,
+            width: screenWidth,
             },
             tabBarItemStyle: {
-            paddingVertical: isTablet ? hp(1) : hp(0.5),
-            paddingHorizontal: wp(0.5),
-            width: (SCREEN_WIDTH - (isTablet ? wp(6) : wp(5))) / 4,
+            paddingVertical: 6,
+            paddingHorizontal: 2,
+                  width: screenWidth  / 4 + 10,
             },
         }}
         >
@@ -44,8 +48,8 @@
                 <HybridTabIcon 
                 focused={focused}
                 label="Главная"
-                iconType="home"
-                size={isTablet ? wp(6) : wp(5.5)}
+                iconType="home" 
+                size={24}
                 />
             ),
             }}
@@ -59,7 +63,7 @@
                 focused={focused}
                 label="Гараж"
                 iconType="garage"
-                size={isTablet ? wp(6) : wp(5.5)}
+                size={24}
                 />
             ),
             }}
@@ -72,8 +76,8 @@
                 <HybridTabIcon 
                 focused={focused}
                 label="История"
-                iconType="history"
-                size={isTablet ? wp(6) : wp(5.5)}
+                iconType="history" 
+                size={24}
                 />
             ),
             }}
@@ -86,8 +90,8 @@
                 <HybridTabIcon 
                 focused={focused}
                 label="Настройки"
-                iconType="settings"
-                size={isTablet ? wp(6) : wp(5.5)}
+                iconType="settings" 
+                size={24}
                 />
             ),
             }}

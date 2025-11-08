@@ -1,8 +1,10 @@
     import React from 'react';
-    import { Animated, View, StyleSheet } from 'react-native';
+    import { Animated, View, StyleSheet, Dimensions } from 'react-native';
     import Svg, { Path } from 'react-native-svg';
     import { Ionicons } from '@expo/vector-icons';
-    import { wp, hp, fontSize } from '../utils/responsive';
+
+    const { width: screenWidth } = Dimensions.get('window');
+    const TAB_WIDTH = (screenWidth - 8) / 4;
 
     // Кастомная иконка только для Главной из Pixso
     const CustomHomeIcon = {
@@ -76,7 +78,7 @@
                 />
             </Svg>
             ) : (
-            // Ionicons иконки Гаража, Истории и Настроек
+            // Ionicons иконки для Гаража, Истории и Настроек
             <Ionicons 
                 name={focused ? IoniconsIcons[iconType].active : IoniconsIcons[iconType].inactive} 
                 size={size} 
@@ -103,21 +105,18 @@
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
-        paddingHorizontal: wp(0.5),
-        paddingTop:hp(0.5),
-    },
-    iconContainer: {
-        marginBottom: hp(0.3),
+        width: TAB_WIDTH,
+        paddingHorizontal: 2,
+        minHeight: 50,
     },
     label: {
-        fontSize: fontSize(10),
+        fontSize: 10,
         color: '#666',
         fontWeight: '500',
+        marginTop: 3,
         textAlign: 'center',
-        lineHeight: fontSize(11),
+        lineHeight: 11,
         includeFontPadding: false,
-        maxWidth: '90%',
     },
     labelFocused: {
         color: '#007AFF',

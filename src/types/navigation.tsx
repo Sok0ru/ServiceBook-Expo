@@ -18,7 +18,6 @@ export type RootStackParamList = {
   CarModels: { brand: string };
   CarGeneration: { brand: string; model: string };
   CarDetailsForm: { brand: string; model: string; generation: string };
-  TestAddCar: undefined;
 };
 
 //таб-навигатор

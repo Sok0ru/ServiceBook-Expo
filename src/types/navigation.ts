@@ -5,7 +5,7 @@
       EmailVerification: { email: string };
       Login: undefined;
       Registration: undefined;
-      
+      useAdaptiveStyles: undefined;
       // Main app
       MainTabs: undefined;
       HybridTabIcon:undefined;

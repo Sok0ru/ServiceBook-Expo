@@ -1,24 +1,31 @@
-    // src/navigation/AppNavigator.tsx
+
     import React from 'react';
     import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-    import { useWindowDimensions } from 'react-native';
+    import { useAdaptiveStyles } from '../hooks/useAdaptiveStyles';
 
-    // Import main screens
+
     import Dashboard from '../screens/Main/Dashboard';
     import Garage from '../screens/Main/Garage';
     import History from '../screens/Main/History';
     import Settings from '../screens/Main/Settings';
 
-    // Import components
+
     import HybridTabIcon from '../components/HybridTabIcon';
 
     const Tab = createBottomTabNavigator();
 
-    // Создаем обертку для HybridTabIcon
+    // обертка 
     const TabBarIconWrapper = (props: any) => {
-    const { route, focused, color, size } = props;
+    const { route, focused } = props;
+    const { adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
     
-    // Определяем тип иконки и label для каждого route
+    // размер иконки
+    const getIconSize = () => {
+        if (isSmallDevice) return 20;
+        if (isTablet) return 28;
+        return 24;
+    };
+
     let iconType: 'home' | 'garage' | 'history' | 'settings' = 'home';
     let label = '';
 
@@ -39,9 +46,6 @@
         iconType = 'settings';
         label = 'Настройки';
         break;
-        default:
-        iconType = 'home';
-        label = 'Главная';
     }
 
     return (
@@ -49,14 +53,27 @@
         focused={focused}
         label={label}
         iconType={iconType}
-        size={size}
+        size={getIconSize()}
         />
     );
     };
 
     export default function AppNavigator() {
-    const { width } = useWindowDimensions();
-    const isSmallScreen = width < 375;
+    const { adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
+
+    // высота таб-бара 
+    const getTabBarHeight = () => {
+        if (isSmallDevice) return 70;  
+        if (isTablet) return 95;       
+        return 80;                     
+    };
+
+    // отступы
+    const getTabBarPadding = () => {
+        if (isSmallDevice) return 4;
+        if (isTablet) return 12;
+        return 8;
+    };
 
     return (
         <Tab.Navigator
@@ -70,30 +87,20 @@
             ),
             tabBarShowLabel: false,
             tabBarStyle: {
-            height: isSmallScreen ? 70 : 80,
-            paddingHorizontal: 8,
+            height: getTabBarHeight(),
+            paddingHorizontal: getTabBarPadding(),
+            paddingTop: 0, 
+            paddingBottom: 0, 
             backgroundColor: '#ffffff',
             borderTopWidth: 1,
             borderTopColor: '#e5e5e5',
-            },
+            }
         })}
         >
-        <Tab.Screen 
-            name="Dashboard" 
-            component={Dashboard}
-        />
-        <Tab.Screen 
-            name="Garage" 
-            component={Garage}
-        />
-        <Tab.Screen 
-            name="History" 
-            component={History}
-        />
-        <Tab.Screen 
-            name="Settings" 
-            component={Settings}
-        />
+        <Tab.Screen name="Dashboard" component={Dashboard} />
+        <Tab.Screen name="Garage" component={Garage} />
+        <Tab.Screen name="History" component={History} />
+        <Tab.Screen name="Settings" component={Settings} />
         </Tab.Navigator>
     );
     }

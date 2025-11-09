@@ -7,6 +7,9 @@
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
+    Keyboard,
+    TouchableWithoutFeedback,
+    useWindowDimensions,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
@@ -30,76 +33,109 @@
 
     export default function Login({ navigation }: Props) {
     const [password, setPassword] = useState('');
+    const { height } = useWindowDimensions();
+
+    const handleContinue = () => {
+        Keyboard.dismiss();
+        navigation.navigate('MainTabs');
+    };
+
+    const handleRegistration = () => {
+        Keyboard.dismiss();
+        navigation.navigate('Registration');
+    };
 
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <KeyboardAvoidingView 
+            <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.content}
-        >
-
-            <View style={styles.topSection}>
-                <Text style={styles.title}>ServiceBook</Text>
-                
-                <TextInput
-                style={styles.input}
-                placeholder="ПАРОЛЬ"
-                placeholderTextColor="#999"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                />
-                
-                <TouchableOpacity style={styles.forgotPassword}>
-                <Text style={styles.forgotPasswordText}>ЗАБЫЛИ ПАРОЛЬ</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                style={[styles.button, !password && styles.buttonDisabled]}
-                onPress={() => navigation.navigate('MainTabs')}
-                disabled={!password}
-                >
-                <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                style={styles.secondaryButton}
-                onPress={() => navigation.navigate('Registration')}
-                >
-                <Text style={styles.secondaryButtonText}>РЕГИСТРАЦИЯ</Text>
-                </TouchableOpacity>
-            </View>
-
+            style={styles.keyboardAvoidingView}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+            >
+            <View style={styles.content}>
+                {/* Верхняя часть - всегда видна */}
+                <View style={styles.headerSection}>
                 <View style={styles.iconContainer}>
-                <AuthIcon size={150} />
+                    <AuthIcon size={height < 700 ? 120 : 150} />
+                </View>
+                <Text style={[
+                    styles.title,
+                    { fontSize: height < 700 ? 24 : 28 }
+                ]}>ServiceBook</Text>
                 </View>
 
-        </KeyboardAvoidingView>
+                {/* Форма */}
+                <View style={styles.formWrapper}>
+                <View style={styles.formSection}>
+                    <TextInput
+                    style={styles.input}
+                    placeholder="ПАРОЛЬ"
+                    placeholderTextColor="#999"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                    returnKeyType="done"
+                    onSubmitEditing={handleContinue}
+                    />
+                    
+                    <TouchableOpacity style={styles.forgotPassword}>
+                        <Text style={styles.forgotPasswordText}>ЗАБЫЛИ ПАРОЛЬ</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                    style={[styles.button, !password && styles.buttonDisabled]}
+                    onPress={handleContinue}
+                    disabled={!password}
+                    >
+                    <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                    style={styles.secondaryButton}
+                    onPress={handleRegistration}
+                    >
+                    <Text style={styles.secondaryButtonText}>РЕГИСТРАЦИЯ</Text>
+                    </TouchableOpacity>
+                </View>
+                </View>
+            </View>
+            </KeyboardAvoidingView> 
         </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
     }
 
     const styles = StyleSheet.create({
     container: {
-        paddingTop:100,
-        padding: 24,
         flex: 1,
         backgroundColor: '#ffffff',
     },
-    content: {
-        paddingTop:100,
+    keyboardAvoidingView: {
         flex: 1,
     },
-    topSection: {
+    content: {
         flex: 1,
-        justifyContent: 'center',
+        paddingHorizontal: 24,
+        paddingTop: 6, 
+    },
+    headerSection: {
+        alignItems: 'center',
+        marginBottom: 20, 
+        marginTop: 10, 
+    },
+    formWrapper: {
+        flex: 0.4, 
+        justifyContent: 'flex-start',
+    },
+    formSection: {
+        width: '100%',
     },
     title: {
-        fontSize: 28,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginBottom: 48,
         color: '#1a1a1a',
+        marginTop: 0,
     },
     input: {
         borderWidth: 1,
@@ -129,9 +165,7 @@
         width: 0,
         height: 4,
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 5,
+
     },
     buttonDisabled: {
         backgroundColor: '#cccccc',
@@ -158,7 +192,5 @@
     },
     iconContainer: {
         alignItems: 'center',
-        marginTop: 0,
-        marginBottom: 20,
     },
     });

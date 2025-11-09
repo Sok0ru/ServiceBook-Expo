@@ -27,10 +27,14 @@
     export default function EmailVerification({ navigation }: Props) {
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        <View style={styles.iconContainer}>
+            <AuthIcon size={150} />
+        </View>
+
         <View style={styles.content}>
             <Text style={styles.title}>ServiceBook</Text>
             <Text style={styles.subtitle}>
-            код подтверждения был отправлен на вашу почту
+            Код подтверждения был отправлен на вашу почту
             </Text>
             
             <TouchableOpacity 
@@ -39,10 +43,6 @@
             >
             <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
             </TouchableOpacity>
-
-            <View style={styles.iconContainer}>
-            <AuthIcon size={150} />
-            </View>
         </View>
         </SafeAreaView>
     );
@@ -50,14 +50,17 @@
 
     const styles = StyleSheet.create({
     container: {
-        paddingTop:100,
+        paddingTop:0,
         flex: 1,
         backgroundColor: '#ffffff',
+        paddingBottom: 200
     },
     content: {
         flex: 1,
         justifyContent: 'space-between', 
         alignItems: 'center',
+        paddingBottom: 100,
+        paddingTop:0,
         padding: 24,
     },
     title: {

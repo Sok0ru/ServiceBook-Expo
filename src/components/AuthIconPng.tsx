@@ -5,7 +5,7 @@
     size?: number;
     };
 
-    export default function AuthIcon({ size = 120 }: AuthIconProps) {
+    export default function AuthIcon({ size = 100 }: AuthIconProps) {
     return (
         <View style={styles.container}>
         <Image 
@@ -24,6 +24,6 @@
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginVertical: 150,
+        marginVertical: 40,
     },
     });

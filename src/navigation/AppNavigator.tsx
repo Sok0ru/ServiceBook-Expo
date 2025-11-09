@@ -1,100 +1,98 @@
+    // src/navigation/AppNavigator.tsx
     import React from 'react';
     import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-    import { Dimensions } from 'react-native';
+    import { useWindowDimensions } from 'react-native';
+
+    // Import main screens
     import Dashboard from '../screens/Main/Dashboard';
     import Garage from '../screens/Main/Garage';
     import History from '../screens/Main/History';
     import Settings from '../screens/Main/Settings';
+
+    // Import components
     import HybridTabIcon from '../components/HybridTabIcon';
 
     const Tab = createBottomTabNavigator();
-    const { width: screenWidth } = Dimensions.get('window');
+
+    // Создаем обертку для HybridTabIcon
+    const TabBarIconWrapper = (props: any) => {
+    const { route, focused, color, size } = props;
+    
+    // Определяем тип иконки и label для каждого route
+    let iconType: 'home' | 'garage' | 'history' | 'settings' = 'home';
+    let label = '';
+
+    switch (route.name) {
+        case 'Dashboard':
+        iconType = 'home';
+        label = 'Главная';
+        break;
+        case 'Garage':
+        iconType = 'garage';
+        label = 'Гараж';
+        break;
+        case 'History':
+        iconType = 'history';
+        label = 'История';
+        break;
+        case 'Settings':
+        iconType = 'settings';
+        label = 'Настройки';
+        break;
+        default:
+        iconType = 'home';
+        label = 'Главная';
+    }
+
+    return (
+        <HybridTabIcon
+        focused={focused}
+        label={label}
+        iconType={iconType}
+        size={size}
+        />
+    );
+    };
 
     export default function AppNavigator() {
+    const { width } = useWindowDimensions();
+    const isSmallScreen = width < 375;
+
     return (
         <Tab.Navigator
-        screenOptions={{
+        screenOptions={({ route }) => ({
             headerShown: false,
+            tabBarIcon: (props) => (
+            <TabBarIconWrapper 
+                route={route}
+                {...props}
+            />
+            ),
             tabBarShowLabel: false,
             tabBarStyle: {
-            backgroundColor: 'white',
-            borderTopWidth: 0,
-            height: 80,
-            paddingBottom: 10,
-            paddingTop: 10,
-            position: 'absolute',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 8,
-            elevation: 8,
-            borderRadius: 16,
-            marginHorizontal: 0,
-            marginBottom: 0,
-            width: screenWidth,
+            height: isSmallScreen ? 70 : 80,
+            paddingHorizontal: 8,
+            backgroundColor: '#ffffff',
+            borderTopWidth: 1,
+            borderTopColor: '#e5e5e5',
             },
-            tabBarItemStyle: {
-            paddingVertical: 6,
-            paddingHorizontal: 2,
-                  width: screenWidth  / 4 + 10,
-            },
-        }}
+        })}
         >
-        <Tab.Screen
-            name="Dashboard"
+        <Tab.Screen 
+            name="Dashboard" 
             component={Dashboard}
-            options={{
-            tabBarIcon: ({ focused }) => (
-                <HybridTabIcon 
-                focused={focused}
-                label="Главная"
-                iconType="home" 
-                size={24}
-                />
-            ),
-            }}
         />
-        <Tab.Screen
-            name="Garage"
+        <Tab.Screen 
+            name="Garage" 
             component={Garage}
-            options={{
-            tabBarIcon: ({ focused }) => (
-                <HybridTabIcon 
-                focused={focused}
-                label="Гараж"
-                iconType="garage"
-                size={24}
-                />
-            ),
-            }}
         />
-        <Tab.Screen
-            name="History"
+        <Tab.Screen 
+            name="History" 
             component={History}
-            options={{
-            tabBarIcon: ({ focused }) => (
-                <HybridTabIcon 
-                focused={focused}
-                label="История"
-                iconType="history" 
-                size={24}
-                />
-            ),
-            }}
         />
-        <Tab.Screen
-            name="Settings"
+        <Tab.Screen 
+            name="Settings" 
             component={Settings}
-            options={{
-            tabBarIcon: ({ focused }) => (
-                <HybridTabIcon 
-                focused={focused}
-                label="Настройки"
-                iconType="settings" 
-                size={24}
-                />
-            ),
-            }}
         />
         </Tab.Navigator>
     );

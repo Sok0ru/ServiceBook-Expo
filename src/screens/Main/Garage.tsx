@@ -54,7 +54,7 @@
 
             {/* Кнопка добавления автомобиля */}
             <TouchableOpacity 
-            style={[styles.addButton, { backgroundColor: '#32CD32' }]}
+            style={[styles.addButton, { backgroundColor: '#007AFF' }]}
             onPress={() => navigation.navigate('AddCar')}
             >
             <Text style={styles.addButtonText}>+ Добавить автомобиль</Text>
@@ -79,7 +79,7 @@
 
             {/* Информационный блок */}
             <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>💡 Совет</Text>
+            <Text style={styles.infoTitle}> Совет</Text>
             <Text style={styles.infoText}>
                 Добавляйте автомобили для отслеживания их обслуживания и получения напоминаний
             </Text>
@@ -153,7 +153,7 @@
     },
     statusText: {
         fontSize: 12,
-        color: '#2E7D32',
+        color: '#27d130ff',
         fontWeight: '500',
     },
     addButton: {

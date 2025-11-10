@@ -5,7 +5,6 @@
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    Keyboard,
     Alert,
     useWindowDimensions,
     } from 'react-native';

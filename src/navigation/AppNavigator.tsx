@@ -81,7 +81,7 @@
             headerShown: false,
             tabBarIcon: (props) => (
             <TabBarIconWrapper 
-                route={route}
+                route={route}   
                 {...props}
             />
             ),

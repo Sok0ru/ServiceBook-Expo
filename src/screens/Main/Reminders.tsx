@@ -9,17 +9,15 @@
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
+    import { RootStackParamList } from '../../types/navigation';
 
     type MainStackParamList = {
     Reminders: undefined;
-    Dashboard: undefined;
     CreateReminder: undefined;
     };
 
-    type RemindersScreenNavigationProp = StackNavigationProp<
-    MainStackParamList,
-    'Reminders'
-    >;
+    type RemindersScreenNavigationProp = StackNavigationProp<MainStackParamList, 'Reminders'>;
 
     type Props = {
     navigation: RemindersScreenNavigationProp;
@@ -35,6 +33,8 @@
     };
 
     export default function Reminders({ navigation }: Props) {
+    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
+
     const [reminders, setReminders] = useState<Reminder[]>([
         {
         id: '1',
@@ -63,115 +63,163 @@
     ]);
 
     const toggleReminder = (id: string) => {
-        setReminders(reminders.map(reminder => 
-        reminder.id === id 
-            ? { ...reminder, enabled: !reminder.enabled }
-            : reminder
+        setReminders(reminders.map(reminder =>
+        reminder.id === id ? { ...reminder, enabled: !reminder.enabled } : reminder
         ));
     };
 
+    const activeReminders = reminders.filter(r => r.enabled);
+    const inactiveReminders = reminders.filter(r => !r.enabled);
+
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+        >
             {/* Заголовок */}
             <View style={styles.header}>
-            <Text style={styles.title}>Напоминания</Text>
-            <Text style={styles.subtitle}>Управление сервисными напоминаниями</Text>
+            <Text style={[styles.title, adaptiveStyles.textXl]}>Напоминания</Text>
+            <Text style={[styles.subtitle, adaptiveStyles.textSm]}>Управление сервисными напоминаниями</Text>
             </View>
 
             {/* Активные напоминания */}
+            {activeReminders.length > 0 && (
             <View style={styles.section}>
-            <Text style={styles.sectionTitle}>АКТИВНЫЕ НАПОМИНАНИЯ</Text>
-            
-            {reminders
-                .filter(reminder => reminder.enabled)
-                .map(reminder => (
-                <View key={reminder.id} style={styles.reminderCard}>
+                <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>АКТИВНЫЕ НАПОМИНАНИЯ</Text>
+                <View
+                style={[
+                    styles.remindersGrid,
+                    {
+                    flexDirection: isTablet ? 'row' : 'column',
+                    flexWrap: isTablet ? 'wrap' : 'nowrap',
+                    gap: adaptiveValues.spacing.lg,
+                    },
+                ]}
+                >
+                {activeReminders.map(reminder => (
+                    <View
+                    key={reminder.id}
+                    style={[
+                        styles.reminderCard,
+                        adaptiveStyles.card,
+                        isTablet && styles.reminderCardTablet,
+                    ]}
+                    >
                     <View style={styles.reminderHeader}>
-                    <Text style={styles.reminderTitle}>{reminder.title}</Text>
-                    <Switch
+                        <Text style={[styles.reminderTitle, adaptiveStyles.textMd]} numberOfLines={2}>
+                        {reminder.title}
+                        </Text>
+                        <Switch
                         value={reminder.enabled}
                         onValueChange={() => toggleReminder(reminder.id)}
                         trackColor={{ false: '#767577', true: '#81b0ff' }}
                         thumbColor={reminder.enabled ? '#007AFF' : '#f4f3f4'}
-                    />
+                        />
                     </View>
-                    
+
                     <View style={styles.reminderDetails}>
-                    <View style={styles.detailItem}>
-                        <Text style={styles.detailLabel}>Тип:</Text>
-                        <Text style={styles.detailValue}>{reminder.type}</Text>
-                    </View>
-                    
-                    <View style={styles.detailItem}>
-                        <Text style={styles.detailLabel}>Пробег:</Text>
-                        <Text style={styles.detailValue}>{reminder.mileage.toLocaleString()} км</Text>
-                    </View>
-                    
-                    <View style={styles.detailItem}>
-                        <Text style={styles.detailLabel}>Дата:</Text>
-                        <Text style={styles.detailValue}>
-                        {new Date(reminder.date).toLocaleDateString('ru-RU')}
+                        <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, adaptiveStyles.textXs]}>Тип:</Text>
+                        <Text style={[styles.detailValue, adaptiveStyles.textSm]}>{reminder.type}</Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, adaptiveStyles.textXs]}>Пробег:</Text>
+                        <Text style={[styles.detailValue, adaptiveStyles.textSm]}>
+                            {reminder.mileage.toLocaleString()} км
                         </Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, adaptiveStyles.textXs]}>Дата:</Text>
+                        <Text style={[styles.detailValue, adaptiveStyles.textSm]}>
+                            {new Date(reminder.date).toLocaleDateString('ru-RU')}
+                        </Text>
+                        </View>
                     </View>
+                        <View
+                        style={[
+                            styles.reminderActions,
+                            { flexDirection: isTablet ? 'row' : 'row' }, // всегда в строку
+                        ]}
+                        >
+                        <TouchableOpacity style={styles.editButton}>
+                            <Text style={[styles.editButtonText, adaptiveStyles.textXs]}>Редактировать</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.deleteButton}>
+                            <Text style={[styles.deleteButtonText, adaptiveStyles.textXs]}>Удалить</Text>
+                        </TouchableOpacity>
+                        </View>
                     </View>
-                    
-                    <View style={styles.reminderActions}>
-                    <TouchableOpacity style={styles.editButton}>
-                        <Text style={styles.editButtonText}>Редактировать</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteButton}>
-                        <Text style={styles.deleteButtonText}>Удалить</Text>
-                    </TouchableOpacity>
-                    </View>
+                ))}
                 </View>
-                ))
-            }
             </View>
+            )}
 
             {/* Неактивные напоминания */}
+            {inactiveReminders.length > 0 && (
             <View style={styles.section}>
-            <Text style={styles.sectionTitle}>НЕАКТИВНЫЕ НАПОМИНАНИЯ</Text>
-            
-            {reminders
-                .filter(reminder => !reminder.enabled)
-                .map(reminder => (
-                <View key={reminder.id} style={[styles.reminderCard, styles.inactiveCard]}>
+                <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>НЕАКТИВНЫЕ НАПОМИНАНИЯ</Text>
+                <View
+                style={[
+                    styles.remindersGrid,
+                    {
+                    flexDirection: isTablet ? 'row' : 'column',
+                    flexWrap: isTablet ? 'wrap' : 'nowrap',
+                    gap: adaptiveValues.spacing.lg,
+                    },
+                ]}
+                >
+                {inactiveReminders.map(reminder => (
+                    <View
+                    key={reminder.id}
+                    style={[
+                        styles.reminderCard,
+                        styles.inactiveCard,
+                        adaptiveStyles.card,
+                        isTablet && styles.reminderCardTablet,
+                    ]}
+                    >
                     <View style={styles.reminderHeader}>
-                    <Text style={[styles.reminderTitle, styles.inactiveText]}>{reminder.title}</Text>
-                    <Switch
+                        <Text style={[styles.reminderTitle, styles.inactiveText, adaptiveStyles.textMd]} numberOfLines={2}>
+                        {reminder.title}
+                        </Text>
+                        <Switch
                         value={reminder.enabled}
                         onValueChange={() => toggleReminder(reminder.id)}
                         trackColor={{ false: '#767577', true: '#81b0ff' }}
                         thumbColor={reminder.enabled ? '#007AFF' : '#f4f3f4'}
-                    />
+                        />
                     </View>
-                    
-                    <View style={styles.reminderDetails}>
-                    <View style={styles.detailItem}>
-                        <Text style={[styles.detailLabel, styles.inactiveText]}>Тип:</Text>
-                        <Text style={[styles.detailValue, styles.inactiveText]}>{reminder.type}</Text>
-                    </View>
-                    
-                    <View style={styles.detailItem}>
-                        <Text style={[styles.detailLabel, styles.inactiveText]}>Пробег:</Text>
-                        <Text style={[styles.detailValue, styles.inactiveText]}>
-                        {reminder.mileage.toLocaleString()} км
-                        </Text>
-                    </View>
-                    </View>
-                </View>
-                ))
-            }
-            </View>
 
-            {/* Кнопка создания нового напоминания */}
-            <TouchableOpacity 
-            style={styles.createButton}
-            onPress={() => navigation.navigate('CreateReminder')} 
+                    <View style={styles.reminderDetails}>
+                        <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, styles.inactiveText, adaptiveStyles.textXs]}>Тип:</Text>
+                        <Text style={[styles.detailValue, styles.inactiveText, adaptiveStyles.textSm]}>{reminder.type}</Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, styles.inactiveText, adaptiveStyles.textXs]}>Пробег:</Text>
+                        <Text style={[styles.detailValue, styles.inactiveText, adaptiveStyles.textSm]}>
+                            {reminder.mileage.toLocaleString()} км
+                        </Text>
+                        </View>
+                    </View>
+                    </View>
+                ))}
+                </View>
+            </View>
+            )}
+
+            {/* Кнопка создания */}
+            <TouchableOpacity
+            style={[styles.createButton, { backgroundColor: '#007AFF' }]}
+            onPress={() => navigation.navigate('CreateReminder')}
             >
-            <Text style={styles.createButtonText}>+ Создать напоминание</Text>
+            <Text style={[styles.createButtonText, adaptiveStyles.textMd]}>+ Создать напоминание</Text>
             </TouchableOpacity>
+
+            {/* Отступ для таб-бара */}
+            <View style={{ height: 20 }} />
         </ScrollView>
         </SafeAreaView>
     );
@@ -184,41 +232,46 @@
     },
     content: {
         flex: 1,
-        padding: 16,
-        paddingTop: 0, 
+        paddingHorizontal: 16,
+    },
+    scrollContent: {
+        paddingVertical: 16,
     },
     header: {
         marginBottom: 24,
     },
     title: {
-        fontSize: 28,
         fontWeight: 'bold',
         color: '#1a1a1a',
-        marginBottom: 8,
     },
     subtitle: {
-        fontSize: 16,
         color: '#666',
     },
     section: {
         marginBottom: 24,
     },
     sectionTitle: {
-        fontSize: 16,
         fontWeight: '600',
-        color: '#1a1a1a',
         marginBottom: 16,
+        color: '#1a1a1a',
+        textTransform: 'uppercase',
+    },
+    remindersGrid: {
+        marginTop: 8,
     },
     reminderCard: {
-        backgroundColor: '#f3f3f3ff',
         padding: 16,
-        borderRadius: 12,
         marginBottom: 12,
+        backgroundColor: 'white',
+        borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
+    },
+    reminderCardTablet: {
+        width: '48%',
     },
     inactiveCard: {
         backgroundColor: '#f8f8f8',
@@ -228,15 +281,14 @@
     reminderHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: 12,
     },
     reminderTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#1a1a1a',
         flex: 1,
         marginRight: 12,
+        fontWeight: '600',
+        color: '#1a1a1a',
     },
     inactiveText: {
         color: '#999',
@@ -244,50 +296,49 @@
     reminderDetails: {
         marginBottom: 12,
     },
-    detailItem: {
+    detailRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 6,
     },
     detailLabel: {
-        fontSize: 14,
-        color: '#666',
         fontWeight: '500',
+        color: '#666',
     },
     detailValue: {
-        fontSize: 14,
-        color: '#1a1a1a',
         fontWeight: '500',
+        color: '#1a1a1a',
     },
     reminderActions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: 12,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
     },
     editButton: {
+        backgroundColor: '#007AFF',
         paddingVertical: 6,
         paddingHorizontal: 12,
-        backgroundColor: '#007AFF',
         borderRadius: 6,
+    },
+    deleteButton: {
+        backgroundColor: '#FF3B30',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+    },
+    fullWidthButton: {
+        width: '100%',
+        alignItems: 'center',
     },
     editButtonText: {
         color: '#f3f3f3ff',
-        fontSize: 12,
         fontWeight: '500',
-    },
-    deleteButton: {
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        backgroundColor: '#FF3B30',
-        borderRadius: 6,
     },
     deleteButtonText: {
         color: '#f3f3f3ff',
-        fontSize: 12,
         fontWeight: '500',
     },
     createButton: {
-        backgroundColor: '#007AFF',
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
@@ -299,8 +350,7 @@
         elevation: 5,
     },
     createButtonText: {
-        color: '#f3f3f3ff',
-        fontSize: 16,
         fontWeight: '600',
+        color: 'white',
     },
     });

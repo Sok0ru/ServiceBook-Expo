@@ -1,3 +1,4 @@
+    // src/screens/Garage/CarGeneration.tsx
     import React, { useState, useEffect } from 'react';
     import {
     View,
@@ -11,19 +12,16 @@
     import { StackNavigationProp } from '@react-navigation/stack';
     import { RouteProp } from '@react-navigation/native';
     import { Ionicons } from '@expo/vector-icons';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
 
-    type CarGenerationScreenNavigationProp = StackNavigationProp<
-    RootStackParamList,
-    'CarGeneration'
-    >;
-
+    type CarGenerationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CarGeneration'>;
     type CarGenerationScreenRouteProp = RouteProp<RootStackParamList, 'CarGeneration'>;
 
     type Props = {
     navigation: CarGenerationScreenNavigationProp;
     route: CarGenerationScreenRouteProp;
-};
+    };
 
     type CarGeneration = {
     id: string;
@@ -33,17 +31,19 @@
     };
 
     export default function CarGeneration({ navigation, route }: Props) {
+    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
     const { brand, model } = route.params;
+
     const [generations, setGenerations] = useState<CarGeneration[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Мок данные поколений
     const mockGenerations: CarGeneration[] = [
-        { id: '1', name: 'V (SGP)', years: '2018-2024', bodyType: 'SUV' },
-        { id: '2', name: 'IV (SJ)', years: '2012-2018', bodyType: 'SUV' },
-        { id: '3', name: 'III (SH)', years: '2008-2012', bodyType: 'SUV' },
-        { id: '4', name: 'II (SG)', years: '2002-2008', bodyType: 'SUV' },
-        { id: '5', name: 'I (SF)', years: '1997-2002', bodyType: 'SUV' },
+        { id: '1', name: 'VI (SL)', years: '2024-н.в.', bodyType: 'SUV' },
+        { id: '2', name: 'V (SK)', years: '2018-2024', bodyType: 'SUV' },
+        { id: '3', name: 'IV (SJ)', years: '2012-2018', bodyType: 'SUV' },
+        { id: '4', name: 'III (SH)', years: '2008-2012', bodyType: 'SUV' },
+        { id: '5', name: 'II (SG)', years: '2002-2008', bodyType: 'SUV' },
+        { id: '6', name: 'I (SF)', years: '1997-2002', bodyType: 'SUV' },
     ];
 
     useEffect(() => {
@@ -55,20 +55,26 @@
 
     const handleGenerationSelect = (generation: CarGeneration) => {
         navigation.navigate('CarDetailsForm', {
-        brand: brand,
-        model: model,
-        generation: generation.name
+        brand,
+        model,
+        generation: generation.name,
         });
     };
 
     const renderGenerationItem = ({ item }: { item: CarGeneration }) => (
         <TouchableOpacity
-        style={styles.generationItem}
+        style={[
+            styles.generationItem,
+            adaptiveStyles.card,
+            isTablet && styles.generationItemTablet,
+        ]}
         onPress={() => handleGenerationSelect(item)}
         >
         <View style={styles.generationInfo}>
-            <Text style={styles.generationName}>{item.name}</Text>
-            <Text style={styles.generationDetails}>
+            <Text style={[styles.generationName, adaptiveStyles.textMd]} numberOfLines={1}>
+            {item.name}
+            </Text>
+            <Text style={[styles.generationDetails, adaptiveStyles.textSm]}>
             {item.years} • {item.bodyType}
             </Text>
         </View>
@@ -78,23 +84,22 @@
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={styles.header}>
-            <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-            >
+        <View style={[styles.header, adaptiveStyles.container]}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#007AFF" />
             </TouchableOpacity>
             <View style={styles.headerTitle}>
-            <Text style={styles.title}>{brand} {model}</Text>
-            <Text style={styles.subtitle}>Выберите поколение</Text>
+            <Text style={[styles.title, adaptiveStyles.textMd]} numberOfLines={1}>
+                {brand} {model}
+            </Text>
+            <Text style={[styles.subtitle, adaptiveStyles.textSm]}>Выберите поколение</Text>
             </View>
         </View>
 
         {loading ? (
             <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>Загрузка поколений...</Text>
+            <Text style={[styles.loadingText, adaptiveStyles.textSm]}>Загрузка поколений...</Text>
             </View>
         ) : (
             <FlatList
@@ -103,6 +108,7 @@
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
+            numColumns={isTablet ? 2 : 1} // ← 2 колонки на планшете
             />
         )}
         </SafeAreaView>
@@ -117,7 +123,7 @@
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 20,
+        paddingVertical: 16,
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
@@ -129,42 +135,10 @@
         flex: 1,
     },
     title: {
-        fontSize: 18,
         fontWeight: 'bold',
         color: '#1a1a1a',
     },
     subtitle: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 4,
-    },
-    listContent: {
-        padding: 16,
-    },
-    generationItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    generationInfo: {
-        flex: 1,
-    },
-    generationName: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#1a1a1a',
-        marginBottom: 4,
-    },
-    generationDetails: {
-        fontSize: 14,
         color: '#666',
     },
     loadingContainer: {
@@ -174,7 +148,37 @@
     },
     loadingText: {
         marginTop: 16,
-        fontSize: 16,
+        color: '#666',
+    },
+    listContent: {
+        padding: 16,
+    },
+    generationItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        marginBottom: 12,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    generationItemTablet: {
+        width: '48%',
+        marginHorizontal: '1%',
+    },
+    generationInfo: {
+        flex: 1,
+    },
+    generationName: {
+        fontWeight: '500',
+        marginBottom: 4,
+        color: '#1a1a1a',
+    },
+    generationDetails: {
         color: '#666',
     },
     });

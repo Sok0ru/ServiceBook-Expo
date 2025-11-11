@@ -1,31 +1,32 @@
+    // src/screens/Main/CarDetails.tsx
     import React from 'react';
     import {
     View,
     Text,
     ScrollView,
-    StyleSheet,
     TouchableOpacity,
+    StyleSheet,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
+    import { RootStackParamList } from '../../types/navigation';
 
     type MainStackParamList = {
     CarDetails: undefined;
-    Dashboard: undefined;
-    Reminders: undefined;
-    Filters: undefined;
+    CreateReminder: undefined;
+    History: undefined;
     };
 
-    type CarDetailsScreenNavigationProp = StackNavigationProp<
-    MainStackParamList,
-    'CarDetails'
-    >;
+    type CarDetailsScreenNavigationProp = StackNavigationProp<MainStackParamList, 'CarDetails'>;
 
     type Props = {
     navigation: CarDetailsScreenNavigationProp;
     };
 
     export default function CarDetails({ navigation }: Props) {
+    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
+
     const carData = {
         model: 'SUBARU FORESTER',
         plate: 'Й312ОУ154',
@@ -36,72 +37,123 @@
         { name: 'Соленоид', status: 'требуется замена или ремонт', critical: true },
         { name: 'Ступица', status: 'требуется замена или ремонт', critical: true },
         { name: 'Крестовина кардана', status: 'требуется замена или ремонт', critical: false },
-        ]
+        ],
     };
 
+    const criticalComponents = carData.components.filter((c) => c.critical);
+    const normalComponents = carData.components.filter((c) => !c.critical);
+
     return (
-            <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+        >
             {/* Заголовок автомобиля */}
-            <View style={styles.carHeader}>
-            <Text style={styles.carTitle}>{carData.model}</Text>
-            <Text style={styles.carInfo}>{carData.plate} • {carData.mileage}</Text>
-            <Text style={styles.carVin}>VIN: {carData.vin}</Text>
+            <View style={[styles.carHeader, adaptiveStyles.card]}>
+            <Text style={[styles.carTitle, adaptiveStyles.textLg]}>{carData.model}</Text>
+            <Text style={[styles.carInfo, adaptiveStyles.textSm]}>
+                {carData.plate} • {carData.mileage}
+            </Text>
+            <Text style={[styles.carVin, adaptiveStyles.textXs]}>VIN: {carData.vin}</Text>
             </View>
 
             {/* Критические компоненты */}
             <View style={styles.section}>
-            <Text style={styles.sectionTitle}>КРИТИЧЕСКИЕ КОМПОНЕНТЫ</Text>
-            <Text style={styles.sectionSubtitle}>Требуют немедленного внимания</Text>
-            
-            {carData.components
-                .filter(component => component.critical)
-                .map((component, index) => (
-                <View key={index} style={[styles.componentCard, styles.criticalCard]}>
-                    <Text style={styles.componentName}>{component.name}</Text>
-                    <Text style={styles.componentStatus}>{component.status}</Text>
+            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>КРИТИЧЕСКИЕ КОМПОНЕНТЫ</Text>
+            <Text style={[styles.sectionSubtitle, adaptiveStyles.textXs]}>Требуют немедленного внимания</Text>
+
+            <View
+                style={[
+                styles.componentsGrid,
+                {
+                    flexDirection: isTablet ? 'row' : 'column',
+                    flexWrap: isTablet ? 'wrap' : 'nowrap',
+                    gap: adaptiveValues.spacing.md,
+                },
+                ]}
+            >
+                {criticalComponents.map((component, index) => (
+                <View
+                    key={index}
+                    style={[
+                    styles.componentCard,
+                    styles.criticalCard,
+                    adaptiveStyles.card,
+                    isTablet && styles.componentCardTablet,
+                    ]}
+                >
+                    <Text style={[styles.componentName, adaptiveStyles.textMd]}>{component.name}</Text>
+                    <Text style={[styles.componentStatus, adaptiveStyles.textSm]}>{component.status}</Text>
                     <TouchableOpacity style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>Запланировать ремонт</Text>
+                    <Text style={[styles.actionButtonText, adaptiveStyles.textSm]}>Запланировать ремонт</Text>
                     </TouchableOpacity>
                 </View>
-                ))
-            }
+                ))}
+            </View>
             </View>
 
             {/* Обычные компоненты */}
             <View style={styles.section}>
-            <Text style={styles.sectionTitle}>РЕКОМЕНДУЕМЫЕ РАБОТЫ</Text>
-            
-            {carData.components
-                .filter(component => !component.critical)
-                .map((component, index) => (
-                <View key={index} style={styles.componentCard}>
-                    <Text style={styles.componentName}>{component.name}</Text>
-                    <Text style={styles.componentStatus}>{component.status}</Text>
+            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>РЕКОМЕНДУЕМЫЕ РАБОТЫ</Text>
+
+            <View
+                style={[
+                styles.componentsGrid,
+                {
+                    flexDirection: isTablet ? 'row' : 'column',
+                    flexWrap: isTablet ? 'wrap' : 'nowrap',
+                    gap: adaptiveValues.spacing.md,
+                },
+                ]}
+            >
+                {normalComponents.map((component, index) => (
+                <View
+                    key={index}
+                    style={[
+                    styles.componentCard,
+                    adaptiveStyles.card,
+                    isTablet && styles.componentCardTablet,
+                    ]}
+                >
+                    <Text style={[styles.componentName, adaptiveStyles.textMd]}>{component.name}</Text>
+                    <Text style={[styles.componentStatus, adaptiveStyles.textSm]}>{component.status}</Text>
                     <TouchableOpacity style={styles.secondaryActionButton}>
-                    <Text style={styles.secondaryActionButtonText}>Отложить</Text>
+                    <Text style={[styles.secondaryActionButtonText, adaptiveStyles.textSm]}>Отложить</Text>
                     </TouchableOpacity>
                 </View>
-                ))
-            }
+                ))}
+            </View>
             </View>
 
             {/* Быстрые действия */}
-            <View style={styles.quickActions}>
-            <TouchableOpacity 
-                style={styles.quickActionButton}
+            <View
+            style={[
+                styles.quickActions,
+                {
+                flexDirection: isTablet ? 'row' : 'column',
+                gap: adaptiveValues.spacing.md,
+                },
+            ]}
+            >
+            <TouchableOpacity
+                style={[styles.quickActionButton, adaptiveStyles.card, isTablet && styles.quickActionButtonTablet]}
                 onPress={() => navigation.navigate('CreateReminder')}
             >
-                <Text style={styles.quickActionText}>Добавить напоминание</Text>
+                <Text style={[styles.quickActionText, adaptiveStyles.textMd]}>Добавить напоминание</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-                style={styles.quickActionButton}
+
+            <TouchableOpacity
+                style={[styles.quickActionButton, adaptiveStyles.card, isTablet && styles.quickActionButtonTablet]}
                 onPress={() => navigation.navigate('History')}
-                >
-                <Text style={styles.quickActionText}>История обслуживания</Text>
+            >
+                <Text style={[styles.quickActionText, adaptiveStyles.textMd]}>История обслуживания</Text>
             </TouchableOpacity>
             </View>
+
+            {/* Отступ для таб-бара */}
+            <View style={{ height: 20 }} />
         </ScrollView>
         </SafeAreaView>
     );
@@ -114,78 +166,77 @@
     },
     content: {
         flex: 1,
-        padding: 16,
+        paddingHorizontal: 16,
     },
     scrollContent: {
-        padding: 16,
-        paddingBottom: 100, 
+        paddingVertical: 16,
     },
     carHeader: {
-        backgroundColor: '#f3f3f3ff',
-        padding: 20,
-        borderRadius: 16,
+        padding: 16,
         marginBottom: 16,
-        shadowColor: '#f3f3f3ff',
+        backgroundColor: 'white',
+        borderRadius: 12,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
     },
     carTitle: {
-        fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 8,
         color: '#1a1a1a',
     },
     carInfo: {
-        fontSize: 16,
-        color: '#999',
         marginBottom: 4,
+        color: '#999',
     },
     carVin: {
-        fontSize: 14,
         color: '#999',
     },
     section: {
         marginBottom: 24,
     },
     sectionTitle: {
-        fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 8,
         color: '#1a1a1a',
+        textTransform: 'uppercase',
     },
     sectionSubtitle: {
-        fontSize: 14,
-        color: '#FF3B30',
         marginBottom: 16,
+        color: '#FF3B30',
         fontWeight: '500',
     },
+    componentsGrid: {
+        marginTop: 8,
+    },
     componentCard: {
-        backgroundColor: '#f3f3f3ff',
         padding: 16,
-        borderRadius: 12,
         marginBottom: 12,
+        backgroundColor: 'white',
+        borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
     },
+    componentCardTablet: {
+        width: '48%',
+    },
     criticalCard: {
         borderLeftWidth: 4,
         borderLeftColor: '#FF3B30',
     },
     componentName: {
-        fontSize: 16,
         fontWeight: '600',
         marginBottom: 4,
         color: '#1a1a1a',
     },
     componentStatus: {
-        fontSize: 14,
-        color: '#FF3B30',
         marginBottom: 12,
+        color: '#FF3B30',
     },
     actionButton: {
         backgroundColor: '#FF3B30',
@@ -196,7 +247,6 @@
     },
     actionButtonText: {
         color: '#f3f3f3ff',
-        fontSize: 14,
         fontWeight: '500',
     },
     secondaryActionButton: {
@@ -209,33 +259,22 @@
     },
     secondaryActionButtonText: {
         color: '#1a1a1a',
-        fontSize: 14,
         fontWeight: '500',
     },
     quickActions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        marginTop: 16,
     },
     quickActionButton: {
-        flex: 1,
-        backgroundColor: '#f3f3f3ff',
         padding: 16,
-        borderRadius: 12,
-        marginHorizontal: 4,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    quickActionButtonTablet: {
+        flex: 1,
     },
     quickActionText: {
-        fontSize: 14,
         fontWeight: '500',
         color: '#007AFF',
-        textAlign: 'center',
-    },
-    bottomSpacer: {
-        height: 20, 
     },
     });

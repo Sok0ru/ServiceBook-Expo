@@ -21,7 +21,12 @@
       TestAddCar: undefined;
       CarModels: undefined;
       CarGeneration: undefined;
-      CarDetailsForm: undefined;
+      History: undefined;
+      CarDetailsForm: {
+        brand: string;
+        model: string;
+        generation: string;
+      };
     };
 
     declare global {

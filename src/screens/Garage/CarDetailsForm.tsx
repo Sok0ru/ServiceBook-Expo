@@ -1,3 +1,4 @@
+    // src/screens/Garage/CarDetailsForm.tsx
     import React, { useState } from 'react';
     import {
     View,
@@ -12,21 +13,21 @@
     import { StackNavigationProp } from '@react-navigation/stack';
     import { RouteProp } from '@react-navigation/native';
     import { Ionicons } from '@expo/vector-icons';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
 
-    type CarDetailsFormScreenNavigationProp = StackNavigationProp<
-    RootStackParamList,
-    'CarDetailsForm'
-    >;
-
+    type CarDetailsFormScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CarDetailsForm'>;
     type CarDetailsFormScreenRouteProp = RouteProp<RootStackParamList, 'CarDetailsForm'>;
 
     type Props = {
     navigation: CarDetailsFormScreenNavigationProp;
     route: CarDetailsFormScreenRouteProp;
     };
+
     export default function CarDetailsForm({ navigation, route }: Props) {
+    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
     const { brand, model, generation } = route.params;
+
     const [formData, setFormData] = useState({
         vin: '',
         year: '',
@@ -37,156 +38,154 @@
     });
 
     const handleSave = () => {
-        // Валидация
         if (!formData.year || !formData.mileage) {
         Alert.alert('Ошибка', 'Пожалуйста, заполните обязательные поля');
         return;
         }
 
-        // TODO: Сохранение в бэкенд
-        console.log('Сохранение автомобиля:', {
-        brand,
-        model,
-        generation,
-        ...formData
-        });
-
-        Alert.alert(
-        'Успех',
-        'Автомобиль добавлен в гараж',
-        [
-            {
-            text: 'OK',
-            onPress: () => navigation.navigate('Garage')
-            }
-        ]
-        );
+        Alert.alert('Успех', 'Автомобиль добавлен в гараж', [
+        { text: 'OK', onPress: () => navigation.navigate('Garage') },
+        ]);
     };
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={styles.header}>
-            <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-            >
+        <View style={[styles.header, adaptiveStyles.container]}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#007AFF" />
             </TouchableOpacity>
             <View style={styles.headerTitle}>
-            <Text style={styles.title}>{brand} {model}</Text>
-            <Text style={styles.subtitle}>{generation}</Text>
+            <Text style={[styles.title, adaptiveStyles.textMd]} numberOfLines={1}>
+                {brand} {model}
+            </Text>
+            <Text style={[styles.subtitle, adaptiveStyles.textSm]}>{generation}</Text>
             </View>
         </View>
 
-        <ScrollView 
+        <ScrollView
             style={styles.content}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
         >
             {/* Информация о выбранном автомобиле */}
-            <View style={styles.carInfoCard}>
-            <Text style={styles.carInfoTitle}>Выбранный автомобиль</Text>
+            <View style={[styles.carInfoCard, adaptiveStyles.card]}>
+            <Text style={[styles.carInfoTitle, adaptiveStyles.textMd]}>Выбранный автомобиль</Text>
             <View style={styles.carInfoRow}>
-                <Text style={styles.carInfoLabel}>Марка:</Text>
-                <Text style={styles.carInfoValue}>{brand}</Text>
+                <Text style={[styles.carInfoLabel, adaptiveStyles.textSm]}>Марка:</Text>
+                <Text style={[styles.carInfoValue, adaptiveStyles.textSm]}>{brand}</Text>
             </View>
             <View style={styles.carInfoRow}>
-                <Text style={styles.carInfoLabel}>Модель:</Text>
-                <Text style={styles.carInfoValue}>{model}</Text>
+                <Text style={[styles.carInfoLabel, adaptiveStyles.textSm]}>Модель:</Text>
+                <Text style={[styles.carInfoValue, adaptiveStyles.textSm]}>{model}</Text>
             </View>
             <View style={styles.carInfoRow}>
-                <Text style={styles.carInfoLabel}>Поколение:</Text>
-                <Text style={styles.carInfoValue}>{generation}</Text>
+                <Text style={[styles.carInfoLabel, adaptiveStyles.textSm]}>Поколение:</Text>
+                <Text style={[styles.carInfoValue, adaptiveStyles.textSm]}>{generation}</Text>
             </View>
             </View>
 
             {/* Форма деталей */}
-            <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>ДЕТАЛИ АВТОМОБИЛЯ</Text>
+            <View style={[styles.formSection, adaptiveStyles.card]}>
+            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>ДЕТАЛИ АВТОМОБИЛЯ</Text>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>VIN номер</Text>
+            {/* 2 колонки на планшете */}
+            <View
+                style={[
+                styles.formGrid,
+                {
+                    flexDirection: isTablet ? 'row' : 'column',
+                    flexWrap: isTablet ? 'wrap' : 'nowrap',
+                    gap: adaptiveValues.spacing.lg,
+                },
+                ]}
+            >
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                <Text style={[styles.inputLabel, adaptiveStyles.textSm]}>VIN номер</Text>
                 <TextInput
-                style={styles.input}
-                placeholder="Введите VIN..."
-                placeholderTextColor="#999"
-                value={formData.vin}
-                onChangeText={(text) => setFormData({...formData, vin: text})}
-                maxLength={17}
-                autoCapitalize="characters"
+                    style={[styles.input, adaptiveStyles.textSm]}
+                    placeholder="Введите VIN..."
+                    placeholderTextColor="#999"
+                    value={formData.vin}
+                    onChangeText={(text) => setFormData({ ...formData, vin: text })}
+                    maxLength={17}
+                    autoCapitalize="characters"
                 />
-            </View>
+                </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Год выпуска *</Text>
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                <Text style={[styles.inputLabel, adaptiveStyles.textSm]}>Год выпуска *</Text>
                 <TextInput
-                style={styles.input}
-                placeholder="Например: 2020"
-                placeholderTextColor="#999"
-                value={formData.year}
-                onChangeText={(text) => setFormData({...formData, year: text})}
-                keyboardType="numeric"
-                maxLength={4}
+                    style={[styles.input, adaptiveStyles.textSm]}
+                    placeholder="Например: 2020"
+                    placeholderTextColor="#999"
+                    value={formData.year}
+                    onChangeText={(text) => setFormData({ ...formData, year: text })}
+                    keyboardType="numeric"
+                    maxLength={4}
                 />
-            </View>
+                </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Пробег (км) *</Text>
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                <Text style={[styles.inputLabel, adaptiveStyles.textSm]}>Пробег (км) *</Text>
                 <TextInput
-                style={styles.input}
-                placeholder="Текущий пробег"
-                placeholderTextColor="#999"
-                value={formData.mileage}
-                onChangeText={(text) => setFormData({...formData, mileage: text})}
-                keyboardType="numeric"
+                    style={[styles.input, adaptiveStyles.textSm]}
+                    placeholder="Текущий пробег"
+                    placeholderTextColor="#999"
+                    value={formData.mileage}
+                    onChangeText={(text) => setFormData({ ...formData, mileage: text })}
+                    keyboardType="numeric"
                 />
-            </View>
+                </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Госномер</Text>
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                <Text style={[styles.inputLabel, adaptiveStyles.textSm]}>Госномер</Text>
                 <TextInput
-                style={styles.input}
-                placeholder="Например: A123BC777"
-                placeholderTextColor="#999"
-                value={formData.licensePlate}
-                onChangeText={(text) => setFormData({...formData, licensePlate: text})}
-                autoCapitalize="characters"
+                    style={[styles.input, adaptiveStyles.textSm]}
+                    placeholder="Например: A123BC777"
+                    placeholderTextColor="#999"
+                    value={formData.licensePlate}
+                    onChangeText={(text) => setFormData({ ...formData, licensePlate: text })}
+                    autoCapitalize="characters"
                 />
-            </View>
+                </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Цвет</Text>
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                <Text style={[styles.inputLabel, adaptiveStyles.textSm]}>Цвет</Text>
                 <TextInput
-                style={styles.input}
-                placeholder="Цвет автомобиля"
-                placeholderTextColor="#999"
-                value={formData.color}
-                onChangeText={(text) => setFormData({...formData, color: text})}
+                    style={[styles.input, adaptiveStyles.textSm]}
+                    placeholder="Цвет автомобиля"
+                    placeholderTextColor="#999"
+                    value={formData.color}
+                    onChangeText={(text) => setFormData({ ...formData, color: text })}
                 />
-            </View>
+                </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Заметки</Text>
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                <Text style={[styles.inputLabel, adaptiveStyles.textSm]}>Заметки</Text>
                 <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Дополнительная информация..."
-                placeholderTextColor="#999"
-                value={formData.notes}
-                onChangeText={(text) => setFormData({...formData, notes: text})}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
+                    style={[styles.input, styles.textArea, adaptiveStyles.textSm]}
+                    placeholder="Дополнительная информация..."
+                    placeholderTextColor="#999"
+                    value={formData.notes}
+                    onChangeText={(text) => setFormData({ ...formData, notes: text })}
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
                 />
+                </View>
             </View>
             </View>
 
             {/* Кнопка сохранения */}
-            <TouchableOpacity 
-            style={styles.saveButton}
+            <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: '#007AFF' }]}
             onPress={handleSave}
             >
-            <Text style={styles.saveButtonText}>Добавить в гараж</Text>
+            <Text style={[styles.saveButtonText, adaptiveStyles.textMd]}>Добавить в гараж</Text>
             </TouchableOpacity>
+
+            {/* Отступ для таб-бара */}
+            <View style={{ height: 20 }} />
         </ScrollView>
         </SafeAreaView>
     );
@@ -200,7 +199,7 @@
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 20,
+        paddingVertical: 16,
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
@@ -212,26 +211,24 @@
         flex: 1,
     },
     title: {
-        fontSize: 18,
         fontWeight: 'bold',
         color: '#1a1a1a',
     },
     subtitle: {
-        fontSize: 14,
         color: '#666',
-        marginTop: 4,
     },
     content: {
         flex: 1,
+        paddingHorizontal: 16,
     },
     scrollContent: {
-        padding: 16,
+        paddingVertical: 16,
     },
     carInfoCard: {
-        backgroundColor: 'white',
         padding: 16,
-        borderRadius: 12,
         marginBottom: 16,
+        backgroundColor: 'white',
+        borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -239,31 +236,27 @@
         elevation: 3,
     },
     carInfoTitle: {
-        fontSize: 16,
         fontWeight: '600',
-        color: '#1a1a1a',
         marginBottom: 12,
+        color: '#1a1a1a',
     },
     carInfoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: 8,
     },
     carInfoLabel: {
-        fontSize: 14,
         color: '#666',
     },
     carInfoValue: {
-        fontSize: 14,
         fontWeight: '500',
         color: '#1a1a1a',
     },
     formSection: {
-        backgroundColor: 'white',
         padding: 16,
-        borderRadius: 12,
         marginBottom: 16,
+        backgroundColor: 'white',
+        borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -271,34 +264,36 @@
         elevation: 3,
     },
     sectionTitle: {
-        fontSize: 14,
         fontWeight: '600',
-        color: '#666',
         marginBottom: 16,
+        color: '#666',
         textTransform: 'uppercase',
+    },
+    formGrid: {
+        marginTop: 8,
     },
     inputGroup: {
         marginBottom: 16,
     },
+    inputGroupTablet: {
+        width: '48%',
+    },
     inputLabel: {
-        fontSize: 14,
         fontWeight: '500',
-        color: '#1a1a1a',
         marginBottom: 8,
+        color: '#1a1a1a',
     },
     input: {
         borderWidth: 1,
         borderColor: '#dddddd',
         borderRadius: 8,
         padding: 12,
-        fontSize: 16,
         backgroundColor: '#f8f8f8',
     },
     textArea: {
         minHeight: 80,
     },
     saveButton: {
-        backgroundColor: '#007AFF',
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
@@ -309,8 +304,7 @@
         elevation: 5,
     },
     saveButtonText: {
-        color: 'white',
-        fontSize: 16,
         fontWeight: '600',
+        color: 'white',
     },
     });

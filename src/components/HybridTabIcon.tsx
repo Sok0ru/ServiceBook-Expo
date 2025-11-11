@@ -14,15 +14,15 @@
     // Ionicons для остальных вкладок
     const IoniconsIcons = {
         garage: {
-            active: 'car-sport' as const,
+            active: 'car-sport-outline' as const,
             inactive: 'car-sport-outline' as const
         },
         history: {
-            active: 'time' as const,
+            active: 'time-outline' as const,
             inactive: 'time-outline' as const
         },
         settings: {
-            active: 'settings' as const,
+            active: 'settings-outline' as const,
             inactive: 'settings-outline' as const
         }
     };
@@ -157,9 +157,9 @@
             ]}>
                 <Animated.View style={[
                     styles.iconContainer,
-                    { 
+                    {
                         transform: [{ scale }],
-                        marginTop: iconMarginTop,
+                        marginTop: containerPaddingBottom
                     }
                 ]}>
                     {renderIcon()}
@@ -190,6 +190,7 @@
             justifyContent: 'flex-start', 
         },
         iconContainer: {
+            paddingTop:25,
             alignItems: 'center',
             justifyContent: 'center',
         },

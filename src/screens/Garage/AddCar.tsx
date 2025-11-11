@@ -8,9 +8,19 @@
     StyleSheet,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
+    import { StackNavigationProp } from '@react-navigation/stack';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
+    import { RootStackParamList } from '../../types/navigation';
 
-    export default function AddCar(props: any) {
-    const { navigation } = props;
+    type AddCarScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddCar'>;
+
+    type Props = {
+    navigation: AddCarScreenNavigationProp;
+    };
+
+    export default function AddCar({ navigation }: Props) {
+    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
+
     const [searchQuery, setSearchQuery] = useState('');
     const [brands] = useState([
         { id: '1', name: 'Audi' },
@@ -34,33 +44,39 @@
     }, [searchQuery, brands]);
 
     const handleBrandSelect = (brand: any) => {
-        alert(`Выбрана марка: ${brand.name}`);
+        navigation.navigate('CarModels', { brand: brand.name });
     };
 
     const renderBrandItem = ({ item }: any) => (
         <TouchableOpacity
-        style={styles.brandItem}
+        style={[
+            styles.brandItem,
+            adaptiveStyles.card,
+            isTablet && styles.brandItemTablet,
+        ]}
         onPress={() => handleBrandSelect(item)}
         >
         <View style={styles.brandLogo}>
-            <Text style={styles.brandIcon}>🚗</Text>
+            <Text style={[styles.brandIcon, adaptiveStyles.textLg]}>🚗</Text>
         </View>
-        <Text style={styles.brandName}>{item.name}</Text>
-        <Text style={styles.arrow}>{'>'}</Text>
+        <Text style={[styles.brandName, adaptiveStyles.textMd]} numberOfLines={1}>
+            {item.name}
+        </Text>
+        <Text style={[styles.arrow, adaptiveStyles.textLg]}>›</Text>
         </TouchableOpacity>
     );
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={styles.header}>
-            <Text style={styles.title}>Добавить автомобиль</Text>
-            <Text style={styles.subtitle}>Выберите марку автомобиля</Text>
+        <View style={[styles.header, adaptiveStyles.container]}>
+            <Text style={[styles.title, adaptiveStyles.textXl]}>Добавить автомобиль</Text>
+            <Text style={[styles.subtitle, adaptiveStyles.textSm]}>Выберите марку автомобиля</Text>
         </View>
 
         {/* Поиск */}
-        <View style={styles.searchContainer}>
+        <View style={[styles.searchContainer, adaptiveStyles.card]}>
             <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, adaptiveStyles.textSm]}
             placeholder="Поиск марки..."
             placeholderTextColor="#999"
             value={searchQuery}
@@ -75,14 +91,15 @@
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
+            numColumns={isTablet ? 2 : 1} // ← 2 колонки на планшете
         />
 
         {/* Кнопка назад */}
-        <TouchableOpacity 
-            style={styles.backButton}
+        <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: '#666' }]}
             onPress={() => navigation.goBack()}
         >
-            <Text style={styles.backButtonText}>Назад в гараж</Text>
+            <Text style={[styles.backButtonText, adaptiveStyles.textMd]}>Назад в гараж</Text>
         </TouchableOpacity>
         </SafeAreaView>
     );
@@ -94,52 +111,48 @@
         backgroundColor: '#f5f5f5',
     },
     header: {
-        padding: 20,
+        paddingVertical: 16,
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
     },
     title: {
-        fontSize: 24,
         fontWeight: 'bold',
         color: '#1a1a1a',
-        marginBottom: 8,
     },
     subtitle: {
-        fontSize: 16,
         color: '#666',
     },
     searchContainer: {
-        backgroundColor: 'white',
-        margin: 16,
+        margin: 6,
         paddingHorizontal: 16,
         paddingVertical: 12,
+        backgroundColor: 'white',
         borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
     },
     searchInput: {
-        fontSize: 16,
         color: '#1a1a1a',
     },
     listContent: {
-        padding: 16,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
     },
     brandItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'white',
         padding: 16,
-        borderRadius: 12,
         marginBottom: 12,
+        backgroundColor: 'white',
+        borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
+    },
+    brandItemTablet: {
+        width: '48%',
+        marginHorizontal: '1%',
     },
     brandLogo: {
         width: 40,
@@ -151,28 +164,24 @@
         marginRight: 16,
     },
     brandIcon: {
-        fontSize: 20,
+        color: '#666',
     },
     brandName: {
         flex: 1,
-        fontSize: 16,
         fontWeight: '500',
         color: '#1a1a1a',
     },
     arrow: {
-        fontSize: 16,
         color: '#ccc',
     },
     backButton: {
-        backgroundColor: '#666',
         margin: 16,
-        padding: 16,
+        paddingVertical: 14,
         borderRadius: 12,
         alignItems: 'center',
     },
     backButtonText: {
-        color: 'white',
-        fontSize: 16,
         fontWeight: '600',
+        color: 'white',
     },
     });

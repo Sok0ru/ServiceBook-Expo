@@ -15,13 +15,13 @@
   import Reminders from './src/screens/Main/Reminders';
   import Filters from './src/screens/Main/Filters';
   import CreateReminder from './src/screens/Main/CreateReminder';
+  import History from './src/screens/Main/History';
 
   // Import garage screens
   import AddCar from './src/screens/Garage/AddCar';
   import CarModels from './src/screens/Garage/CarModels';
   import CarGeneration from './src/screens/Garage/CarGeneration';
   import CarDetailsForm from './src/screens/Garage/CarDetailsForm';
-  import TestAddCar from './src/screens/Garage/TestAddCar';
 
   // Import main navigator
   import AppNavigator from './src/navigation/AppNavigator';
@@ -83,6 +83,14 @@
             }}
           />
           <Stack.Screen 
+            name="History" 
+            component={History}
+            options={{ 
+              headerShown: true,
+              title: 'История'
+            }}
+          />
+          <Stack.Screen 
             name="Reminders" 
             component={Reminders}
             options={{ 
@@ -128,14 +136,6 @@
             options={{ 
               headerShown: true,
               title: 'Детали автомобиля'
-            }}
-          />
-          <Stack.Screen 
-            name="TestAddCar" 
-            component={TestAddCar}
-            options={{ 
-              headerShown: true,
-              title: 'Тест навигации'
             }}
           />
         </Stack.Navigator>

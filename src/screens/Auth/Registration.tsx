@@ -178,6 +178,7 @@
         backgroundColor: '#f8f8f8',
     },
     checkboxContainer: {
+        marginTop:20,
         marginBottom: 32,
     },
     checkboxItem: {

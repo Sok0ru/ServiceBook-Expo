@@ -10,10 +10,12 @@
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
+    import { useTheme } from '../../contexts/ThemeContext';
 
     export default function Settings() {
     const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
-
+    const { theme, toggleTheme } = useTheme();
+    const isDark = theme === 'dark';
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <ScrollView
@@ -43,8 +45,8 @@
             <View style={[styles.section, adaptiveStyles.card]}>
                 <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>ПРИЛОЖЕНИЕ</Text>
                 <View style={styles.settingItem}>
-                <Text style={[styles.settingText, adaptiveStyles.textMd]}>Темная тема</Text>
-                <Switch value={false} />
+                    <Text style={[styles.settingText, adaptiveStyles.textMd]}>Тёмная тема</Text>
+                    <Switch value={isDark} onValueChange={toggleTheme} />
                 </View>
                 <TouchableOpacity style={styles.settingItem}>
                 <Text style={[styles.settingText, adaptiveStyles.textMd]}>Язык</Text>

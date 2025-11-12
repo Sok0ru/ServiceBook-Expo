@@ -3,6 +3,7 @@
   import { NavigationContainer } from '@react-navigation/native';
   import { createNativeStackNavigator } from '@react-navigation/native-stack';
   import { StatusBar } from 'expo-status-bar';
+  import { ThemeProvider } from './src/contexts/ThemeContext';
 
   // Import auth screens
   import EmailLogin from './src/screens/Auth/LoginScreen';
@@ -33,6 +34,7 @@
 
   export default function App() {
     return (
+      <ThemeProvider>
       <NavigationContainer>
         <StatusBar style="auto" />
         <Stack.Navigator 
@@ -140,5 +142,6 @@
           />
         </Stack.Navigator>
       </NavigationContainer>
+      </ThemeProvider>
     );
   }

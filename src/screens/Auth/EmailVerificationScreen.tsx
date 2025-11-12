@@ -15,7 +15,8 @@
 
     export default function EmailVerificationScreen() {
     const navigation = useNavigation<EmailVerificationScreenNavigationProp>();
-    const { adaptiveStyles, isTablet } = useAdaptiveStyles();
+    const { adaptiveStyles} = useAdaptiveStyles();
+      const { isTablet } = useAdaptiveStyles(); 
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -43,50 +44,50 @@
     }
 
     const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#ffffff',
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: isTablet ? 120 : 100,
-        paddingBottom: isTablet ? 120 : 100,
-    },
-    iconContainer: {
-        marginTop: isTablet ? 60 : 40,
-        marginBottom: isTablet ? 60 : 40,
-    },
-    textBlock: {
-        alignItems: 'center',
-        marginBottom: isTablet ? 64 : 48,
-    },
-    title: {
-        fontWeight: 'bold',
-        marginBottom: 16,
-        color: '#1a1a1a',
-        textAlign: 'center',
-    },
-    subtitle: {
-        textAlign: 'center',
-        color: '#666666',
-        lineHeight: 22,
-    },
-    button: {
-        paddingVertical: 16,
-        paddingHorizontal: 32,
-        borderRadius: 12,
-        width: '100%',
-        alignItems: 'center',
-        shadowColor: '#007AFF',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: '600',
-    },
-    });
+        container: {
+            flex: 1,
+            backgroundColor: '#ffffff',
+        },
+        content: {
+            flex: 1,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: 100, 
+            paddingBottom: 100,
+        },
+        iconContainer: {
+            marginTop: 40,
+            marginBottom: 40,
+        },
+        textBlock: {
+            alignItems: 'center',
+            marginBottom: 48,
+        },
+        title: {
+            fontWeight: 'bold',
+            marginBottom: 16,
+            color: '#1a1a1a',
+            textAlign: 'center',
+        },
+        subtitle: {
+            textAlign: 'center',
+            color: '#666666',
+            lineHeight: 22,
+        },
+        button: {
+            paddingVertical: 16,
+            paddingHorizontal: 32,
+            borderRadius: 12,
+            width: '100%',
+            alignItems: 'center',
+            shadowColor: '#007AFF',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5,
+        },
+        buttonText: {
+            color: 'white',
+            fontWeight: '600',
+        },
+        });

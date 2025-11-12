@@ -28,11 +28,11 @@
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={[styles.content, { paddingHorizontal: isTablet ? 48 : 24 }]}>
-            <View style={styles.iconContainer}>
+            <View style={[styles.iconContainer, {marginTop: isTablet ? 60 : 40, marginBottom: isTablet ? 60 : 40,}]}>
             <AuthIcon size={isTablet ? 200 : 150} />
             </View>
 
-            <View style={styles.textBlock}>
+            <View style={[styles.textBlock, { marginBottom: isTablet ? 64 : 48, }]}>
             <Text style={[styles.title, adaptiveStyles.textXl]}>ServiceBook</Text>
             <Text style={[styles.subtitle, adaptiveStyles.textSm]}>
                 Код подтверждения был отправлен на вашу почту
@@ -59,16 +59,13 @@
         flex: 1,
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: isTablet ? 120 : 100,
-        paddingBottom: isTablet ? 120 : 100,
+        paddingTop: 100, 
+        paddingBottom: 100,
     },
     iconContainer: {
-        marginTop: isTablet ? 60 : 40,
-        marginBottom: isTablet ? 60 : 40,
     },
     textBlock: {
         alignItems: 'center',
-        marginBottom: isTablet ? 64 : 48,
     },
     title: {
         fontWeight: 'bold',

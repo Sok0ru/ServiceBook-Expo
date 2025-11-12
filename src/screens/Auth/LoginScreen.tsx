@@ -1,4 +1,3 @@
-    // src/screens/Auth/LoginScreen.tsx
     import React, { useState } from 'react';
     import {
     View,
@@ -8,29 +7,24 @@
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
-    Alert,
-    useWindowDimensions,
     Keyboard,
     TouchableWithoutFeedback,
+    useWindowDimensions,
+    Alert,
     } from 'react-native';
-    import { useNavigation } from '@react-navigation/native';
-    // @ts-ignore
+    import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import { useNavigation } from '@react-navigation/native';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
 
-    type LoginScreenNavigationProp = StackNavigationProp<
-    RootStackParamList,
-    'EmailLogin'
-    >;
+    type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EmailLogin'>;
 
     export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigation = useNavigation<LoginScreenNavigationProp>();
-    const { width } = useWindowDimensions();
-    
-    const isSmallScreen = width < 375;
+    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,26 +32,19 @@
     };
 
     const handleContinue = async () => {
-        // Скрываем клавиатуру перед навигацией
         Keyboard.dismiss();
-
         if (!email.trim()) {
         Alert.alert('Ошибка', 'Пожалуйста, введите email');
         return;
         }
-
         if (!validateEmail(email)) {
         Alert.alert('Ошибка', 'Пожалуйста, введите корректный email');
         return;
         }
 
         setIsLoading(true);
-
         try {
-        // Имитация запроса к API
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Переход на страницу подтверждения
         navigation.navigate('EmailVerification', { email });
         } catch (error) {
         Alert.alert('Ошибка', 'Не удалось отправить код подтверждения');
@@ -71,55 +58,21 @@
         navigation.navigate('Registration');
     };
 
-    // Функция для скрытия клавиатуры при тапе вне поля ввода
-    const dismissKeyboard = () => {
-        Keyboard.dismiss();
-    };
-
     return (
-        <TouchableWithoutFeedback onPress={dismissKeyboard}>
-        <View style={styles.container}>
-            <KeyboardAvoidingView
-            style={styles.keyboardAvoidingView}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+            style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-            >
-            <ScrollView 
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-                bounces={false} // Отключаем bounce эффект
-            >
-                <View style={[
-                styles.content,
-                { paddingHorizontal: isSmallScreen ? 20 : 24 }
-                ]}>
-                <Text style={[
-                    styles.title,
-                    { fontSize: isSmallScreen ? 22 : 24 }
-                ]}>
-                    Вход в сервисную книжку
-                </Text>
-                
-                <Text style={[
-                    styles.subtitle,
-                    { fontSize: isSmallScreen ? 14 : 16 }
-                ]}>
-                    Введите ваш email для получения кода подтверждения
-                </Text>
+        >
+            <View style={[styles.content, { paddingHorizontal: isTablet ? 32 : 16 }]}>
+            <View style={styles.centerContent}>
+                <Text style={[styles.title, adaptiveStyles.textXl]}>Вход в сервисную книжку</Text>
+                <Text style={[styles.subtitle, adaptiveStyles.textSm]}>Введите ваш email для получения кода подтверждения</Text>
 
                 <View style={styles.inputContainer}>
-                    <Text style={[
-                    styles.label,
-                    { fontSize: isSmallScreen ? 14 : 16 }
-                    ]}>
-                    Email
-                    </Text>
-                    <TextInput
-                    style={[
-                        styles.input,
-                        isSmallScreen && styles.smallInput
-                    ]}
+                <Text style={[styles.label, adaptiveStyles.textMd]}>Email</Text>
+                <TextInput
+                    style={[styles.input, adaptiveStyles.textSm]}
                     placeholder="example@mail.ru"
                     placeholderTextColor="#999"
                     value={email}
@@ -130,47 +83,31 @@
                     editable={!isLoading}
                     returnKeyType="done"
                     onSubmitEditing={handleContinue}
-                    />
+                />
                 </View>
 
                 <TouchableOpacity
-                    style={[
-                    styles.button,
-                    (!email.trim() || isLoading) && styles.buttonDisabled
-                    ]}
-                    onPress={handleContinue}
-                    disabled={!email.trim() || isLoading}
+                style={[styles.button, (!email.trim() || isLoading) && styles.buttonDisabled]}
+                onPress={handleContinue}
+                disabled={!email.trim() || isLoading}
                 >
-                    <Text style={[
-                    styles.buttonText,
-                    { fontSize: isSmallScreen ? 14 : 16 }
-                    ]}>
+                <Text style={[styles.buttonText, adaptiveStyles.textMd]}>
                     {isLoading ? 'Отправка...' : 'Продолжить'}
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.registrationLink}
-                    onPress={handleRegistration}
-                >
-                    <Text style={[
-                    styles.registrationText,
-                    { fontSize: isSmallScreen ? 12 : 14 }
-                    ]}>
-                    Нет аккаунта? Зарегистрироваться
-                    </Text>
-                </TouchableOpacity>
-
-                <Text style={[
-                    styles.footerText,
-                    { fontSize: isSmallScreen ? 10 : 12 }
-                ]}>
-                    Нажимая «Продолжить», вы соглашаетесь с условиями использования
                 </Text>
-                </View>
-            </ScrollView>
-            </KeyboardAvoidingView>
-        </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.registrationLink} onPress={handleRegistration}>
+                <Text style={[styles.registrationText, adaptiveStyles.textSm]}>
+                    Нет аккаунта? Зарегистрироваться
+                </Text>
+                </TouchableOpacity>
+
+                <Text style={[styles.footerText, adaptiveStyles.textXs]}>
+                Нажимая «Продолжить», вы соглашаетесь с условиями использования
+                </Text>
+            </View>
+            </View>
+        </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
     );
     }
@@ -180,18 +117,16 @@
         flex: 1,
         backgroundColor: '#fff',
     },
-    keyboardAvoidingView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-    },
     content: {
         flex: 1,
+        justifyContent: 'center',
         paddingTop: 60,
         paddingBottom: 40,
+    },
+    centerContent: {
+        flexGrow: 1,
         justifyContent: 'center',
+        paddingBottom: 40,
     },
     title: {
         fontWeight: 'bold',
@@ -219,12 +154,7 @@
         borderRadius: 8,
         paddingHorizontal: 16,
         paddingVertical: 14,
-        fontSize: 16,
         backgroundColor: '#f9f9f9',
-    },
-    smallInput: {
-        paddingVertical: 12,
-        fontSize: 14,
     },
     button: {
         backgroundColor: '#007AFF',
@@ -232,6 +162,11 @@
         paddingVertical: 16,
         alignItems: 'center',
         marginBottom: 16,
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
     },
     buttonDisabled: {
         backgroundColor: '#ccc',

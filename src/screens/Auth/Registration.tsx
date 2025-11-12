@@ -11,6 +11,8 @@
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import { useNavigation } from '@react-navigation/native';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import AuthIcon from '../../components/AuthIconPng';
 
     type AuthStackParamList = {
@@ -19,16 +21,12 @@
     EmailVerification: undefined;
     };
 
-    type RegistrationScreenNavigationProp = StackNavigationProp<
-    AuthStackParamList,
-    'Registration'
-    >;
+    type RegistrationScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Registration'>;
 
-    type Props = {
-    navigation: RegistrationScreenNavigationProp;
-    };
+    export default function Registration() {
+    const navigation = useNavigation<RegistrationScreenNavigationProp>();
+    const { adaptiveStyles, isTablet } = useAdaptiveStyles();
 
-    export default function Registration({ navigation }: Props) {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -36,88 +34,97 @@
     });
 
     const handleRegister = () => {
-        // TODO: Регистрация
         navigation.navigate('EmailVerification');
     };
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.content}
         >
-            <ScrollView 
+            <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             >
-            <View style={styles.topSection}>
-                <Text style={styles.title}>ServiceBook</Text>
-                
-                <Text style={styles.sectionTitle}>Регистрация</Text>
-                
-                {/* Поля регистрации */}
-                <View style={styles.fieldsContainer}>
-                <TextInput
-                    style={styles.input}
+            <View style={[styles.topSection, { paddingHorizontal: isTablet ? 48 : 24 }]}>
+                <Text style={[styles.title, adaptiveStyles.textXl]}>ServiceBook</Text>
+                <Text style={[styles.sectionTitle, adaptiveStyles.textLg]}>Регистрация</Text>
+
+                {/* Поля регистрации - 2 колонки на планшете */}
+                <View
+                style={[
+                    styles.fieldsGrid,
+                    { flexDirection: isTablet ? 'row' : 'column' },
+                ]}
+                >
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                    <TextInput
+                    style={[styles.input, adaptiveStyles.textSm]}
                     placeholder="Email"
                     placeholderTextColor="#999"
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={formData.email}
-                    onChangeText={(text) => setFormData({...formData, email: text})}
-                />
-                
-                <TextInput
-                    style={styles.input}
+                    onChangeText={(text) => setFormData({ ...formData, email: text })}
+                    />
+                </View>
+
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                    <TextInput
+                    style={[styles.input, adaptiveStyles.textSm]}
                     placeholder="Пароль"
                     placeholderTextColor="#999"
                     secureTextEntry
                     value={formData.password}
-                    onChangeText={(text) => setFormData({...formData, password: text})}
-                />
-                
-                <TextInput
-                    style={styles.input}
+                    onChangeText={(text) => setFormData({ ...formData, password: text })}
+                    />
+                </View>
+
+                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
+                    <TextInput
+                    style={[styles.input, adaptiveStyles.textSm]}
                     placeholder="Подтвердите пароль"
                     placeholderTextColor="#999"
                     secureTextEntry
                     value={formData.confirmPassword}
-                    onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
-                />
+                    onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+                    />
+                </View>
                 </View>
 
-                {/* Checkboxes из дизайна */}
+                {/* Чек-боксы */}
                 <View style={styles.checkboxContainer}>
                 <View style={styles.checkboxItem}>
                     <View style={styles.checkbox} />
-                    <Text style={styles.checkboxText}>Прочитал ненужные документы</Text>
+                    <Text style={[styles.checkboxText, adaptiveStyles.textSm]}>Прочитал ненужные документы</Text>
                 </View>
                 <View style={styles.checkboxItem}>
                     <View style={styles.checkbox} />
-                    <Text style={styles.checkboxText}>Согласен на рассылку</Text>
+                    <Text style={[styles.checkboxText, adaptiveStyles.textSm]}>Согласен на рассылку</Text>
                 </View>
                 <View style={styles.checkboxItem}>
                     <View style={styles.checkbox} />
-                    <Text style={styles.checkboxText}>Согласен на оформление микрозайма :)</Text>
+                    <Text style={[styles.checkboxText, adaptiveStyles.textSm]}>Согласен на оформление микрозайма :)</Text>
                 </View>
                 </View>
 
-                <TouchableOpacity 
-                style={styles.button}
+                <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#007AFF' }]}
                 onPress={handleRegister}
                 >
-                <Text style={styles.buttonText}>РЕГИСТРАЦИЯ</Text>
+                <Text style={[styles.buttonText, adaptiveStyles.textMd]}>РЕГИСТРАЦИЯ</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity 
-                style={styles.secondaryButton}
+                <TouchableOpacity
+                style={[styles.secondaryButton, { borderColor: '#007AFF' }]}
                 onPress={() => navigation.navigate('Login')}
                 >
-                <Text style={styles.secondaryButtonText}>ВОЙТИ</Text>
+                <Text style={[styles.secondaryButtonText, adaptiveStyles.textMd]}>ВОЙТИ</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.linkButton}>
-                <Text style={styles.linkButtonText}>СБРОСИТЬ ПАРОЛЬ</Text>
+                <Text style={[styles.linkButtonText, adaptiveStyles.textSm]}>СБРОСИТЬ ПАРОЛЬ</Text>
                 </TouchableOpacity>
             </View>
             </ScrollView>
@@ -137,35 +144,37 @@
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'space-between',
-        padding: 24,
+        paddingVertical: 24,
     },
     topSection: {
         flex: 1,
     },
     title: {
-        fontSize: 28,
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 32,
         color: '#1a1a1a',
     },
     sectionTitle: {
-        fontSize: 20,
         fontWeight: '600',
         marginBottom: 24,
         color: '#1a1a1a',
         textAlign: 'center',
     },
-    fieldsContainer: {
-        marginBottom: 24,
+    fieldsGrid: {
+        gap: 16,
+    },
+    inputGroup: {
+        flex: 1,
+    },
+    inputGroupTablet: {
+        width: '48%',
     },
     input: {
         borderWidth: 1,
         borderColor: '#dddddd',
         borderRadius: 12,
         padding: 16,
-        marginBottom: 16,
-        fontSize: 16,
         backgroundColor: '#f8f8f8',
     },
     checkboxContainer: {
@@ -185,11 +194,9 @@
         marginRight: 12,
     },
     checkboxText: {
-        fontSize: 16,
         color: '#333',
     },
     button: {
-        backgroundColor: '#007AFF',
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
@@ -202,7 +209,6 @@
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
         fontWeight: '600',
     },
     secondaryButton: {
@@ -210,12 +216,8 @@
         borderRadius: 12,
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#007AFF',
-        marginBottom: 12,
     },
     secondaryButtonText: {
-        color: '#007AFF',
-        fontSize: 16,
         fontWeight: '600',
     },
     linkButton: {
@@ -224,12 +226,6 @@
     },
     linkButtonText: {
         color: '#007AFF',
-        fontSize: 14,
         fontWeight: '500',
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginTop: 40,
-        marginBottom: 20,
     },
     });

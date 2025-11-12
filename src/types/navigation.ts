@@ -1,8 +1,9 @@
     // src/types/navigation.ts
     export type RootStackParamList = {
       // Auth flow
+      
       EmailLogin: undefined;
-      EmailVerification: { email: string };
+      EmailVerification: undefined;
       Login: undefined;
       Registration: undefined;
       useAdaptiveStyles: undefined;

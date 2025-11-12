@@ -9,31 +9,24 @@
     Platform,
     Keyboard,
     TouchableWithoutFeedback,
-    useWindowDimensions,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import { useNavigation } from '@react-navigation/native';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import AuthIcon from '../../components/AuthIconPng';
 
     type AuthStackParamList = {
-    EmailVerification: undefined;
     Login: undefined;
     Registration: undefined;
     MainTabs: undefined;
     };
 
-    type LoginScreenNavigationProp = StackNavigationProp<
-    AuthStackParamList,
-    'Login'
-    >;
-
-    type Props = {
-    navigation: LoginScreenNavigationProp;
-    };
+    type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
     export default function Login({ navigation }: Props) {
     const [password, setPassword] = useState('');
-    const { height } = useWindowDimensions();
+    const { adaptiveStyles, isTablet } = useAdaptiveStyles();
 
     const handleContinue = () => {
         Keyboard.dismiss();
@@ -48,28 +41,22 @@
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-            <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            <KeyboardAvoidingView
             style={styles.keyboardAvoidingView}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
-            <View style={styles.content}>
-                {/* Верхняя часть - всегда видна */}
+            <View style={[styles.content, { paddingHorizontal: isTablet ? 48 : 24 }]}>
+                {/* Верхняя часть - иконка + заголовок */}
                 <View style={styles.headerSection}>
-                <View style={styles.iconContainer}>
-                    <AuthIcon size={height < 700 ? 120 : 150} />
-                </View>
-                <Text style={[
-                    styles.title,
-                    { fontSize: height < 700 ? 24 : 28 }
-                ]}>ServiceBook</Text>
+                <AuthIcon size={isTablet ? 180 : 150} />
+                <Text style={[styles.title, adaptiveStyles.textXl]}>ServiceBook</Text>
                 </View>
 
                 {/* Форма */}
                 <View style={styles.formWrapper}>
                 <View style={styles.formSection}>
                     <TextInput
-                    style={styles.input}
+                    style={[styles.input, adaptiveStyles.textSm]}
                     placeholder="ПАРОЛЬ"
                     placeholderTextColor="#999"
                     secureTextEntry
@@ -78,29 +65,28 @@
                     returnKeyType="done"
                     onSubmitEditing={handleContinue}
                     />
-                    
+
                     <TouchableOpacity style={styles.forgotPassword}>
-                        <Text style={styles.forgotPasswordText}>ЗАБЫЛИ ПАРОЛЬ</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                    style={[styles.button, !password && styles.buttonDisabled]}
-                    onPress={handleContinue}
-                    disabled={!password}
-                    >
-                    <Text style={styles.buttonText}>ПРОДОЛЖИТЬ</Text>
+                    <Text style={[styles.forgotPasswordText, adaptiveStyles.textSm]}>ЗАБЫЛИ ПАРОЛЬ</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                    style={styles.secondaryButton}
+                    <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#007AFF' }]}
+                    onPress={handleContinue}
+                    >
+                    <Text style={[styles.buttonText, adaptiveStyles.textMd]}>ПРОДОЛЖИТЬ</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                    style={[styles.secondaryButton, { borderColor: '#007AFF' }]}
                     onPress={handleRegistration}
                     >
-                    <Text style={styles.secondaryButtonText}>РЕГИСТРАЦИЯ</Text>
+                    <Text style={[styles.secondaryButtonText, adaptiveStyles.textMd]}>РЕГИСТРАЦИЯ</Text>
                     </TouchableOpacity>
                 </View>
                 </View>
             </View>
-            </KeyboardAvoidingView> 
+            </KeyboardAvoidingView>
         </SafeAreaView>
         </TouchableWithoutFeedback>
     );
@@ -116,16 +102,16 @@
     },
     content: {
         flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 6, 
+        paddingTop: 20,
+        paddingBottom: 40,
+        justifyContent: 'center',
     },
     headerSection: {
         alignItems: 'center',
-        marginBottom: 20, 
-        marginTop: 10, 
+        marginBottom: 20,
     },
     formWrapper: {
-        flex: 0.4, 
+        flex: 0.4,
         justifyContent: 'flex-start',
     },
     formSection: {
@@ -135,7 +121,7 @@
         fontWeight: 'bold',
         textAlign: 'center',
         color: '#1a1a1a',
-        marginTop: 0,
+        marginTop: 16,
     },
     input: {
         borderWidth: 1,
@@ -143,7 +129,6 @@
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
-        fontSize: 16,
         backgroundColor: '#f8f8f8',
     },
     forgotPassword: {
@@ -152,29 +137,21 @@
     },
     forgotPasswordText: {
         color: '#007AFF',
-        fontSize: 14,
         fontWeight: '500',
     },
     button: {
-        backgroundColor: '#007AFF',
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
+        marginBottom: 12,
         shadowColor: '#007AFF',
-        shadowOffset: {
-        width: 0,
-        height: 4,
-        },
-
-    },
-    buttonDisabled: {
-        backgroundColor: '#cccccc',
-        shadowOpacity: 0,
-        elevation: 0,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
         fontWeight: '600',
     },
     secondaryButton: {
@@ -182,15 +159,8 @@
         borderRadius: 12,
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#007AFF',
-        marginTop: 12,
     },
     secondaryButtonText: {
-        color: '#007AFF',
-        fontSize: 16,
         fontWeight: '600',
-    },
-    iconContainer: {
-        alignItems: 'center',
     },
     });

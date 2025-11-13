@@ -16,6 +16,7 @@
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import AuthIcon from '../../components/AuthIconPng';
 
+    
     type AuthStackParamList = {
     Login: undefined;
     Registration: undefined;
@@ -24,7 +25,8 @@
 
     type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
-    export default function Login({ navigation }: Props) {
+    export default function Login() {
+    const navigation = useNavigation<any>();
     const [password, setPassword] = useState('');
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
 

@@ -14,7 +14,9 @@ import React, { useState, useEffect } from 'react';
     import { Ionicons } from '@expo/vector-icons';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
+
     
+
     type CarModelsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CarModels'>;
     type CarModelsScreenRouteProp = RouteProp<RootStackParamList, 'CarModels'>;
 
@@ -29,9 +31,10 @@ import React, { useState, useEffect } from 'react';
     years: string;
     };
 
+    
     export default function CarModels({ navigation, route }: Props) {
     const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
-    const { brand } = route.params;
+    const { brand } = route.params as unknown as { brand: string };
 
     const [models, setModels] = useState<CarModel[]>([]);
     const [loading, setLoading] = useState(true);
@@ -65,10 +68,7 @@ import React, { useState, useEffect } from 'react';
     }, [brand]);
 
     const handleModelSelect = (model: CarModel) => {
-        navigation.navigate('CarGeneration', {
-        brand: brand,
-        model: model.name,
-        });
+    navigation.navigate('CarGeneration', { brand, model: model.name });
     };
 
     const renderModelItem = ({ item }: { item: CarModel }) => (

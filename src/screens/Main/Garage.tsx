@@ -19,7 +19,7 @@
     History: undefined;
     };
 
-    type GarageScreenNavigationProp = StackNavigationProp<MainStackParamList, 'Garage'>;
+    type GarageScreenNavigationProp = StackNavigationProp<MainStackParamList>;
 
     type Props = {
     navigation: GarageScreenNavigationProp;

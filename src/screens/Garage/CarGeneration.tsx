@@ -32,7 +32,7 @@
 
     export default function CarGeneration({ navigation, route }: Props) {
     const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
-    const { brand, model } = route.params;
+    const { brand, model } = route.params as unknown as { brand: string; model: string };
 
     const [generations, setGenerations] = useState<CarGeneration[]>([]);
     const [loading, setLoading] = useState(true);

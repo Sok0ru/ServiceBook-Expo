@@ -8,123 +8,104 @@
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    Alert,
+    ActivityIndicator,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
-    import { StackNavigationProp } from '@react-navigation/stack';
     import { useNavigation } from '@react-navigation/native';
-    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
-    import AuthIcon from '../../components/AuthIconPng';
-
-    type AuthStackParamList = {
-    Registration: undefined;
-    Login: undefined;
-    EmailVerification: undefined;
-    };
-
-    type RegistrationScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Registration'>;
+    import { authAPI } from '../../api/auth';
+    import { StackNavigationProp } from '@react-navigation/stack';
 
     export default function Registration() {
-    const navigation = useNavigation<RegistrationScreenNavigationProp>();
-    const { adaptiveStyles, isTablet } = useAdaptiveStyles();
 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         confirmPassword: '',
     });
+    const [loading, setLoading] = useState(false);
 
-    const handleRegister = () => {
-        navigation.navigate('EmailVerification');
+    type RootStackParamList = {
+        EmailVerification: { email: string; password: string };
+    };
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'EmailVerification'>>();
+    
+    const handleRegister = async () => {
+        const { email, password, confirmPassword } = formData;
+        if (!email || !password || !confirmPassword) {
+        Alert.alert('Ошибка', 'Заполните все поля');
+        return;
+        }
+        if (password !== confirmPassword) {
+        Alert.alert('Ошибка', 'Пароли не совпадают');
+        return;
+        }
+        if (password.length < 6) {
+        Alert.alert('Ошибка', 'Пароль минимум 6 символов');
+        return;
+        }
+        setLoading(true);
+        try {
+        await authAPI.requestCode(email);
+        navigation.navigate('EmailVerification', { email, password });
+        } catch (e: any) {
+        Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось отправить код');
+        Alert.alert(String(e))
+        } finally {
+        setLoading(false);
+        }
     };
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.content}
-        >
-            <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            >
-            <View style={[styles.topSection, { paddingHorizontal: isTablet ? 48 : 24 }]}>
-                <Text style={[styles.title, adaptiveStyles.textXl]}>ServiceBook</Text>
-                <Text style={[styles.sectionTitle, adaptiveStyles.textLg]}>Регистрация</Text>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.content}>
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.topSection}>
+                <Text style={styles.title}>ServiceBook</Text>
+                <Text style={styles.sectionTitle}>Регистрация</Text>
 
-                {/* Поля регистрации - 2 колонки на планшете */}
-                <View
-                style={[
-                    styles.fieldsGrid,
-                    { flexDirection: isTablet ? 'row' : 'column' },
-                ]}
-                >
-                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
-                    <TextInput
-                    style={[styles.input, adaptiveStyles.textSm]}
+                {/* Поля */}
+                <View style={styles.fieldsGrid}>
+                <TextInput
+                    style={styles.input}
                     placeholder="Email"
                     placeholderTextColor="#999"
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={formData.email}
                     onChangeText={(text) => setFormData({ ...formData, email: text })}
-                    />
-                </View>
-
-                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
-                    <TextInput
-                    style={[styles.input, adaptiveStyles.textSm]}
+                />
+                <TextInput
+                    style={styles.input}
                     placeholder="Пароль"
                     placeholderTextColor="#999"
                     secureTextEntry
                     value={formData.password}
                     onChangeText={(text) => setFormData({ ...formData, password: text })}
-                    />
-                </View>
-
-                <View style={[styles.inputGroup, isTablet && styles.inputGroupTablet]}>
-                    <TextInput
-                    style={[styles.input, adaptiveStyles.textSm]}
+                />
+                <TextInput
+                    style={styles.input}
                     placeholder="Подтвердите пароль"
                     placeholderTextColor="#999"
                     secureTextEntry
                     value={formData.confirmPassword}
                     onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
-                    />
-                </View>
+                />
                 </View>
 
-                {/* Чек-боксы */}
+                {/* Чек-боксы-заглушки */}
                 <View style={styles.checkboxContainer}>
-                <View style={styles.checkboxItem}>
-                    <View style={styles.checkbox} />
-                    <Text style={[styles.checkboxText, adaptiveStyles.textSm]}>Прочитал ненужные документы</Text>
-                </View>
-                <View style={styles.checkboxItem}>
-                    <View style={styles.checkbox} />
-                    <Text style={[styles.checkboxText, adaptiveStyles.textSm]}>Согласен на рассылку</Text>
-                </View>
-                <View style={styles.checkboxItem}>
-                    <View style={styles.checkbox} />
-                    <Text style={[styles.checkboxText, adaptiveStyles.textSm]}>Согласен на оформление микрозайма :)</Text>
-                </View>
+                <View style={styles.checkboxItem}><View style={styles.checkbox} /><Text style={styles.checkboxText}>Прочитал ненужные документы</Text></View>
+                <View style={styles.checkboxItem}><View style={styles.checkbox} /><Text style={styles.checkboxText}>Согласен на рассылку</Text></View>
+                <View style={styles.checkboxItem}><View style={styles.checkbox} /><Text style={styles.checkboxText}>Согласен на оформление микрозайма :)</Text></View>
                 </View>
 
-                <TouchableOpacity
-                style={[styles.button, { backgroundColor: '#007AFF' }]}
-                onPress={handleRegister}
-                >
-                <Text style={[styles.buttonText, adaptiveStyles.textMd]}>РЕГИСТРАЦИЯ</Text>
+                <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleRegister} disabled={loading}>
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>РЕГИСТРАЦИЯ</Text>}
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                style={[styles.secondaryButton, { borderColor: '#007AFF' }]}
-                onPress={() => navigation.navigate('Login')}
-                >
-                <Text style={[styles.secondaryButtonText, adaptiveStyles.textMd]}>ВОЙТИ</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.linkButton}>
-                <Text style={[styles.linkButtonText, adaptiveStyles.textSm]}>СБРОСИТЬ ПАРОЛЬ</Text>
+                <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login' as never)}>
+                <Text style={styles.secondaryButtonText}>ВОЙТИ</Text>
                 </TouchableOpacity>
             </View>
             </ScrollView>
@@ -134,72 +115,29 @@
     }
 
     const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#ffffff',
-    },
-    content: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'space-between',
-        paddingVertical: 24,
-    },
-    topSection: {
-        flex: 1,
-    },
-    title: {
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 32,
-        color: '#1a1a1a',
-    },
-    sectionTitle: {
-        fontWeight: '600',
-        marginBottom: 24,
-        color: '#1a1a1a',
-        textAlign: 'center',
-    },
-    fieldsGrid: {
-        gap: 16,
-    },
-    inputGroup: {
-        flex: 1,
-    },
-    inputGroupTablet: {
-        width: '48%',
-    },
+    container: { flex: 1, backgroundColor: '#ffffff' },
+    content: { flex: 1 },
+    scrollContent: { flexGrow: 1, paddingVertical: 24 },
+    topSection: { paddingHorizontal: 24 },
+    title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 8, color: '#1a1a1a' },
+    sectionTitle: { fontSize: 18, fontWeight: '600', textAlign: 'center', marginBottom: 24, color: '#1a1a1a' },
+    fieldsGrid: { gap: 16 },
     input: {
         borderWidth: 1,
         borderColor: '#dddddd',
         borderRadius: 12,
         padding: 16,
         backgroundColor: '#f8f8f8',
+        fontSize: 16,
     },
-    checkboxContainer: {
-        marginTop:20,
-        marginBottom: 32,
-    },
-    checkboxItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderWidth: 2,
-        borderColor: '#007AFF',
-        borderRadius: 4,
-        marginRight: 12,
-    },
-    checkboxText: {
-        color: '#333',
-    },
+    checkboxContainer: { marginTop: 20, marginBottom: 32 },
+    checkboxItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+    checkbox: { width: 20, height: 20, borderWidth: 2, borderColor: '#007AFF', borderRadius: 4, marginRight: 12 },
+    checkboxText: { color: '#333', fontSize: 14 },
     button: {
-        paddingVertical: 16,
+        backgroundColor: '#007AFF',
         borderRadius: 12,
+        paddingVertical: 16,
         alignItems: 'center',
         marginBottom: 12,
         shadowColor: '#007AFF',
@@ -208,25 +146,8 @@
         shadowRadius: 8,
         elevation: 5,
     },
-    buttonText: {
-        color: 'white',
-        fontWeight: '600',
-    },
-    secondaryButton: {
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-        borderWidth: 2,
-    },
-    secondaryButtonText: {
-        fontWeight: '600',
-    },
-    linkButton: {
-        paddingVertical: 16,
-        alignItems: 'center',
-    },
-    linkButtonText: {
-        color: '#007AFF',
-        fontWeight: '500',
-    },
+    buttonDisabled: { backgroundColor: '#cccccc' },
+    buttonText: { color: '#ffffff', fontWeight: '600', fontSize: 16 },
+    secondaryButton: { paddingVertical: 16, borderRadius: 12, alignItems: 'center', borderWidth: 2, borderColor: '#007AFF' },
+    secondaryButtonText: { fontWeight: '600', color: '#007AFF', fontSize: 16 },
     });

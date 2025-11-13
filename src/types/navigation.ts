@@ -1,9 +1,9 @@
-    // src/types/navigation.ts
     export type RootStackParamList = {
       // Auth flow
       
       EmailLogin: undefined;
       EmailVerification: undefined;
+      EmailVerificationScreen:undefined;
       Login: undefined;
       Registration: undefined;
       useAdaptiveStyles: undefined;
@@ -19,15 +19,10 @@
       CreateReminder: undefined;
       Garage: undefined;
       AddCar: undefined;
-      TestAddCar: undefined;
-      CarModels: undefined;
-      CarGeneration: undefined;
+      CarModels: { brand: string };
+      CarGeneration: { brand: string; model: string };
+      CarDetailsForm: { brand: string; model: string; generation: string };
       History: undefined;
-      CarDetailsForm: {
-        brand: string;
-        model: string;
-        generation: string;
-      };
     };
 
     declare global {

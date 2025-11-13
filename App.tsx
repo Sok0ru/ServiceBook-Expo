@@ -7,7 +7,7 @@
 
   // Import auth screens
   import EmailLogin from './src/screens/Auth/LoginScreen';
-  import EmailVerification from './src/screens/Auth/EmailVerification';
+  import EmailVerification from './src/screens/Auth/EmailVerificationScreen';
   import Login from './src/screens/Auth/Login';
   import Registration from './src/screens/Auth/Registration';
 
@@ -29,6 +29,7 @@
 
   // Import types
   import { RootStackParamList } from './src/types/navigation';
+  import EmailVerificationScreen from './src/screens/Auth/EmailVerificationScreen';
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -49,8 +50,8 @@
             component={EmailLogin}
           />
           <Stack.Screen 
-            name="EmailVerification" 
-            component={EmailVerification}
+            name="EmailVerificationScreen" 
+            component={EmailVerificationScreen}
           />
           <Stack.Screen 
             name="Login" 

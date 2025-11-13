@@ -17,7 +17,7 @@ type MainStackParamList = {
   Filters: undefined;
 };
 
-type DashboardScreenNavigationProp = StackNavigationProp<MainStackParamList, 'Dashboard'>;
+type DashboardScreenNavigationProp = StackNavigationProp<MainStackParamList>;
 
 type Props = {
   navigation: DashboardScreenNavigationProp;

@@ -7,7 +7,6 @@
 
   // Import auth screens
   import EmailLogin from './src/screens/Auth/LoginScreen';
-  import EmailVerification from './src/screens/Auth/EmailVerificationScreen';
   import Login from './src/screens/Auth/Login';
   import Registration from './src/screens/Auth/Registration';
 

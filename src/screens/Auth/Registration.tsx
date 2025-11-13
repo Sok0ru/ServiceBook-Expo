@@ -10,6 +10,7 @@
     Platform,
     Alert,
     ActivityIndicator,
+    Keyboard,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { useNavigation } from '@react-navigation/native';
@@ -29,7 +30,12 @@
         EmailVerification: { email: string; password: string };
     };
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'EmailVerification'>>();
-    
+      
+    const handleRegistration = () => {
+          Keyboard.dismiss();
+          navigation.navigate('EmailVerificationScreen');
+      };  
+
     const handleRegister = async () => {
         const { email, password, confirmPassword } = formData;
         if (!email || !password || !confirmPassword) {
@@ -100,11 +106,11 @@
                 <View style={styles.checkboxItem}><View style={styles.checkbox} /><Text style={styles.checkboxText}>Согласен на оформление микрозайма :)</Text></View>
                 </View>
 
-                <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleRegister} disabled={loading}>
+                <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleRegistration} disabled={loading}>
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>РЕГИСТРАЦИЯ</Text>}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login' as never)}>
+                <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('EmailVerificationScreen' as never)}>
                 <Text style={styles.secondaryButtonText}>ВОЙТИ</Text>
                 </TouchableOpacity>
             </View>

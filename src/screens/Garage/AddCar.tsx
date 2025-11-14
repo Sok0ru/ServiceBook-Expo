@@ -4,8 +4,9 @@
     import { StackNavigationProp } from '@react-navigation/stack';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
+    import { AddCarStackParamList } from '../../types/navigation';
 
-    type NavigationProp = StackNavigationProp<RootStackParamList, 'CarModels'>;
+    type NavigationProp = StackNavigationProp<AddCarStackParamList, 'CarModels'>;
 
     const mockBrands = [
     'Audi', 'BMW', 'Mercedes-Benz', 'Volkswagen', 'Toyota', 'Honda', 'Nissan', 'Hyundai', 'Kia', 'Subaru',
@@ -16,7 +17,7 @@
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
 
     const handleBrandSelect = (brand: string) => {
-        navigation.navigate('CarModels', { brand });
+    navigation.navigate('CarModels', { brand });
     };
 
     const renderItem = ({ item }: { item: string }) => (

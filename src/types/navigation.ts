@@ -7,7 +7,6 @@
       EmailVerification: { email: string; password?: string };
       Login: undefined;
       Registration: undefined;
-      // Main app
       MainTabs: undefined;
       
       // Individual screens (если нужен прямой доступ)
@@ -16,16 +15,25 @@
       Filters: undefined;
       CreateReminder: undefined;
       Garage: undefined;
-      AddCar: undefined;
-      CarModels: { brand: string };
-      CarGeneration: { brand: string; model: string };
-      CarDetailsForm: { brand: string; model: string; generation: string; };
       History: undefined;
       CarDetails: { carId: string };
       
 
     };
+    export type MainTabParamList = {
+      Dashboard: undefined;
+      Garage: undefined;
+      History: undefined;
+      Settings: undefined;
+      AddCarStack: undefined;  
+    };
 
+    export type AddCarStackParamList = {
+      AddCar: undefined;
+      CarModels: { brand: string };
+      CarGeneration: { brand: string; model: string };
+      CarDetailsForm: { brand: string; model: string; generation: string };
+    };
     export type Car = {
       id: string;
       brand: string;
@@ -35,6 +43,10 @@
       mileage?: number;
       color?: string;
       plate?: string;
+    };
+    export type Brand = {
+      id: string;
+      name: string;
     };
     declare global {
       namespace ReactNavigation {

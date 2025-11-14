@@ -187,7 +187,9 @@
     const styles = StyleSheet.create({
         container: {
             alignItems: 'center',
-            justifyContent: 'flex-start', 
+            justifyContent: 'center',
+            paddingVertical: 4,   
+            paddingHorizontal: 4,
         },
         iconContainer: {
             paddingTop:25,

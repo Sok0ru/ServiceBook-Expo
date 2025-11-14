@@ -14,9 +14,10 @@
     import { Ionicons } from '@expo/vector-icons';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
+    import { AddCarStackParamList } from '../../types/navigation';
 
-    type CarGenerationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CarGeneration'>;
-    type CarGenerationScreenRouteProp = RouteProp<RootStackParamList, 'CarGeneration'>;
+    type CarGenerationScreenNavigationProp = StackNavigationProp<AddCarStackParamList, 'CarGeneration'>;
+    type CarGenerationScreenRouteProp = RouteProp<AddCarStackParamList, 'CarGeneration'>;
 
     type Props = {
     navigation: CarGenerationScreenNavigationProp;

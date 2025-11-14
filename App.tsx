@@ -13,6 +13,9 @@
 
   // Main
   import AppNavigator from './src/navigation/AppNavigator';
+import Filters from './src/screens/Main/Filters';
+import Reminders from './src/screens/Main/Reminders';
+
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -27,6 +30,8 @@
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Registration" component={Registration} />
             <Stack.Screen name="MainTabs" component={AppNavigator} />
+            <Stack.Screen name="Filters" component={Filters} />
+            <Stack.Screen name="Reminders" component={Reminders} /> 
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>

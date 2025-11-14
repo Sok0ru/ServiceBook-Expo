@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
-import { carsAPI } from '../../api/cars';
-import { RootStackParamList, Car } from '../../types/navigation';
+    import React, { useEffect, useState } from 'react';
+    import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+    import { useNavigation } from '@react-navigation/native';
+    import { StackNavigationProp } from '@react-navigation/stack';
+    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
+    import { carsAPI } from '../../api/cars';
+    import { RootStackParamList, Car, MainTabParamList } from '../../types/navigation';
+    import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
     type NavigationProp = StackNavigationProp<RootStackParamList, 'CarDetails'>;
+    type GarageNavProp = BottomTabNavigationProp<MainTabParamList, 'Garage'>;
+    type RootNav = StackNavigationProp<RootStackParamList>;
     
     export default function Garage() {
-    const navigation = useNavigation<NavigationProp>();   
+    const navigation = useNavigation<RootNav>();  
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
     const [cars, setCars] = useState<Car[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,7 +49,9 @@ import { RootStackParamList, Car } from '../../types/navigation';
         },
         ]);
     };
-
+        const handlePress = (carId: string) => {
+            navigation.navigate('CarDetails', { carId }); 
+        };
     const renderItem = ({ item }: { item: Car }) => (
         <TouchableOpacity
         style={[styles.card, isTablet && styles.cardTablet]}
@@ -80,9 +85,12 @@ import { RootStackParamList, Car } from '../../types/navigation';
             numColumns={isTablet ? 2 : 1}
         />
 
-        <TouchableOpacity style={[styles.fab, isTablet && styles.fabTablet]} onPress={() => navigation.navigate('AddCar' as never)}>
+            <TouchableOpacity
+            style={[styles.fab, isTablet && styles.fabTablet]}
+            onPress={() => (navigation as any).navigate('AddCarStack')}
+            >
             <Text style={styles.fabText}>+ Добавить</Text>
-        </TouchableOpacity>
+            </TouchableOpacity>
         </View>
     );
     }

@@ -5,8 +5,9 @@
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { carsAPI } from '../../api/cars';
     import { RootStackParamList, Car } from '../../types/navigation';
+    import {AddCarStackParamList} from '../../types/navigation'
 
-    type RouteProp = import('@react-navigation/native').RouteProp<RootStackParamList, 'CarDetailsForm'>;
+    type RouteProp = import('@react-navigation/native').RouteProp<AddCarStackParamList, 'CarDetailsForm'>;
     type NavigationProp = StackNavigationProp<RootStackParamList, 'Garage'>;
 
     export default function CarDetailsFormScreen() {

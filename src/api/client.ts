@@ -2,11 +2,13 @@
     import axios from 'axios';
     import * as SecureStore from 'expo-secure-store';
     import Constants from 'expo-constants';
+    import { Platform } from 'react-native';
 
     const BASE_URL =
-    Constants.manifest?.extra?.apiUrl ||
-    (typeof location !== 'undefined' && location.origin + '/api') ||
-    'http://servicebook.sashaprok.ru/api';
+    Constants.manifest?.extra?.apiUrl ||          // ← первым читаем из .env
+    (Platform.OS === 'web'                       // ← веб всегда на бэк
+        ? 'http://servicebook.sashaprok.ru/api'
+        : 'http://servicebook.sashaprok.ru/api')
 
     export let accessToken: string | null = null;   // 1. глобальная переменная
 

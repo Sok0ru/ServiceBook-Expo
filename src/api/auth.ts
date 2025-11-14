@@ -6,8 +6,9 @@
     requestCode: (email: string) =>
         api.post('/email/request', { email }).then(() => null),
 
-    signUp: (email: string, password: string, code: string) =>
-        api.post<{ id: string; jwt: JwtPair }>('/user/sign-up', { email, password, code }).then((r) => r.data),
+    signUp: (email: string, password: string, code: number) =>   // ← number
+        api.post<{ id: string; jwt: JwtPair }>('/user/sign-up', { email, password, code })
+        .then(r => r.data),
 
     logIn: (email: string, password: string) =>
         api.post<{ id: string; jwt: JwtPair }>('/user/log-in', { email, password }).then((r) => r.data),

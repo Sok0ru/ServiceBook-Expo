@@ -1,5 +1,8 @@
 {
   "expo": {
+    "web": {
+      "proxy": "http://servicebook.sashaprok.ru"
+    },
     "name": "ServiceBook",
     "slug": "servicebook",
     "version": "1.0.0",
@@ -24,9 +27,6 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.yourcompany.servicebook"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }

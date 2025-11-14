@@ -19,19 +19,22 @@
     const navigation = useNavigation<NavigationProp>();
 
     const handleSignUp = async () => {
-        if (!isComplete) return Alert.alert('Введите 6 цифр');
-        if (password.length < 6) return Alert.alert('Пароль минимум 6 символов');
-        setLoading(true);
-        try {
-        const { jwt } = await authAPI.signUp(email, password, code.join(''));
+    if (!isComplete) return Alert.alert('Введите 6 цифр');
+    if (password.length < 6) return Alert.alert('Пароль минимум 6 символов');
+    setLoading(true);
+    try {
+        const codeNum = Number(code.join(''));
+        console.log('👉 signUp body:', { email, password, code: codeNum });
+        const { jwt } = await authAPI.signUp(email, password, codeNum);
         await setAccessToken(jwt.accessToken);
         navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
-        } catch (e: any) {
-        Alert.alert('Ошибка', e.response?.data?.message || 'Неверный код');
-        } finally {
+    } catch (e: any) {
+        Alert.alert('Ошибка', e.response?.data?.description || 'Неверный код');
+    } finally {
         setLoading(false);
-        }
+    }
     };
+
 
     return (
         <View style={styles.container}>

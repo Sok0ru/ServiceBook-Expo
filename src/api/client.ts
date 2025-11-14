@@ -1,3 +1,4 @@
+    // src/api/client.ts
     import axios from 'axios';
     import * as SecureStore from 'expo-secure-store';
     import Constants from 'expo-constants';
@@ -7,41 +8,48 @@
     (typeof location !== 'undefined' && location.origin + '/api') ||
     'http://servicebook.sashaprok.ru/api';
 
+    export let accessToken: string | null = null;   // 1. глобальная переменная
+
+    /* ------ 2. однократно читаем токен при запуске ------ */
+    SecureStore.getItemAsync('access').then(t => { accessToken = t; });
+
     export const api = axios.create({
     baseURL: BASE_URL,
     timeout: 15000,
     withCredentials: true,
     });
 
+    /* ------ 3. синхронный request-интерцептор ------ */
     api.interceptors.request.use(
     (config) => {
-        const t = SecureStore.getItemAsync('access'); 
-        if (t) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${t}`;
+        if (accessToken) {
+        config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${accessToken}`,
+        };
         }
         return config;
     },
     (err) => Promise.reject(err)
     );
 
-    // 2. response: 401 → refresh
+    /* ------ 4. response: 401 → refresh ------ */
     api.interceptors.response.use(
     (res) => res,
-    (err) => {
+    async (err) => {
         const orig = err.config;
         if (err.response?.status === 401 && !orig._retry) {
         orig._retry = true;
-        return api.get('/user/refresh')
-            .then(({ data }) => {
-            const jwt = (data as any).jwt;
-            SecureStore.setItemAsync('access', jwt.accessToken);
-            return api(orig);
-            })
-            .catch(() => {
-            SecureStore.deleteItemAsync('access');
+        try {
+            const { data } = await api.get<{ jwt: { accessToken: string; refreshToken: string } }>('/user/refresh');
+            accessToken = data.jwt.accessToken;                 // обновляем переменную
+            await SecureStore.setItemAsync('access', accessToken);
+            return api(orig);                                   // повторяем запрос
+        } catch {
+            accessToken = null;
+            await SecureStore.deleteItemAsync('access');
             return Promise.reject(err);
-            });
+        }
         }
         return Promise.reject(err);
     }

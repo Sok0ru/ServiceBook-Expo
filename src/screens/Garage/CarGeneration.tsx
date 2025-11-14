@@ -54,7 +54,7 @@
     }, []);
 
     const handleGenerationSelect = (generation: CarGeneration) => {
-        navigation.navigate('CarDetailsForm', {
+    navigation.navigate('CarDetailsForm', {
         brand,
         model,
         generation: generation.name,

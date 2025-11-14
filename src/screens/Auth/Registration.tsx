@@ -17,7 +17,13 @@
     import { authAPI } from '../../api/auth';
     import { StackNavigationProp } from '@react-navigation/stack';
 
+    type RootStackParamList = {
+    EmailVerification: { email: string; password: string };
+    };
+
+    
     export default function Registration() {
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'EmailVerification'>>();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -25,16 +31,6 @@
         confirmPassword: '',
     });
     const [loading, setLoading] = useState(false);
-
-    type RootStackParamList = {
-        EmailVerification: { email: string; password: string };
-    };
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'EmailVerification'>>();
-      
-    const handleRegistration = () => {
-          Keyboard.dismiss();
-          navigation.navigate('EmailVerificationScreen');
-      };  
 
     const handleRegister = async () => {
         const { email, password, confirmPassword } = formData;
@@ -56,7 +52,6 @@
         navigation.navigate('EmailVerification', { email, password });
         } catch (e: any) {
         Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось отправить код');
-        Alert.alert(String(e))
         } finally {
         setLoading(false);
         }
@@ -106,11 +101,11 @@
                 <View style={styles.checkboxItem}><View style={styles.checkbox} /><Text style={styles.checkboxText}>Согласен на оформление микрозайма :)</Text></View>
                 </View>
 
-                <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleRegistration} disabled={loading}>
+                <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleRegister} disabled={loading}>
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>РЕГИСТРАЦИЯ</Text>}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('EmailVerificationScreen' as never)}>
+                <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login' as never)}>
                 <Text style={styles.secondaryButtonText}>ВОЙТИ</Text>
                 </TouchableOpacity>
             </View>

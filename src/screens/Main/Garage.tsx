@@ -1,257 +1,133 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
+import { carsAPI } from '../../api/cars';
+import { RootStackParamList, Car } from '../../types/navigation';
 
-    import React from 'react';
-    import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    StyleSheet,
-    } from 'react-native';
-    import { SafeAreaView } from 'react-native-safe-area-context';
-    import { StackNavigationProp } from '@react-navigation/stack';
-    import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
-    import { RootStackParamList } from '../../types/navigation';
+    type NavigationProp = StackNavigationProp<RootStackParamList, 'CarDetails'>;
+    
+    export default function Garage() {
+    const navigation = useNavigation<NavigationProp>();   
+    const { adaptiveStyles, isTablet } = useAdaptiveStyles();
+    const [cars, setCars] = useState<Car[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    type MainStackParamList = {
-    CarDetails: undefined;
-    AddCar: undefined;
-    Reminders: undefined;
-    History: undefined;
+    const loadCars = async () => {
+        try {
+        const data = await carsAPI.list();
+        setCars(data);
+        } catch (e: any) {
+        Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось загрузить машины');
+        } finally {
+        setLoading(false);
+        }
     };
 
-    type GarageScreenNavigationProp = StackNavigationProp<MainStackParamList>;
+    useEffect(() => {
+        const unsub = navigation.addListener('focus', loadCars);
+        return unsub;
+    }, [navigation]);
 
-    type Props = {
-    navigation: GarageScreenNavigationProp;
+    const handleDelete = (id: string) => {
+        Alert.alert('Удалить?', 'Это действие нельзя отменить', [
+        { text: 'Отмена' },
+        {
+            text: 'Удалить',
+            onPress: async () => {
+            try {
+                await carsAPI.delete(id);
+                setCars((prev) => prev.filter((c) => c.id !== id));
+            } catch (e: any) {
+                Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось удалить');
+            }
+            },
+        },
+        ]);
     };
 
-    export default function Garage({ navigation }: Props) {
-    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
+    const renderItem = ({ item }: { item: Car }) => (
+        <TouchableOpacity
+        style={[styles.card, isTablet && styles.cardTablet]}
+        onPress={() => navigation.navigate('CarDetails', { carId: item.id })}
+        >
+        <View style={styles.row}>
+            <Text style={[styles.brand, adaptiveStyles.textMd]}>{item.brand}</Text>
+            <Text style={[styles.model, adaptiveStyles.textSm]}>{item.model}</Text>
+        </View>
+        <Text style={[styles.meta, adaptiveStyles.textXs]}>{item.year} • {item.mileage} км</Text>
+        <TouchableOpacity style={styles.delete} onPress={() => handleDelete(item.id)}>
+            <Text style={styles.deleteText}>Удалить</Text>
+        </TouchableOpacity>
+        </TouchableOpacity>
+    );
 
-    const cars = [
-        {
-        id: '1',
-        model: 'SUBARU FORESTER',
-        plate: 'K7770T555',
-        mileage: '121404 км',
-        },
-        {
-        id: '2',
-        model: 'TOYOTA CAMRY',
-        plate: 'A123BC777',
-        mileage: '85600 км',
-        },
-    ];
+    if (loading) return <ActivityIndicator style={{ flex: 1 }} />;
 
     return (
-        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        <View style={[styles.container, adaptiveStyles.container]}>
         <View style={[styles.header, adaptiveStyles.container]}>
-            <Text style={[styles.title, adaptiveStyles.textXl]}>Гараж</Text>
-            <Text style={[styles.subtitle, adaptiveStyles.textSm]}>Ваши автомобили</Text>
+            <Text style={[styles.headerTitle, adaptiveStyles.textLg]}>Гараж</Text>
+            <Text style={[styles.headerSub, adaptiveStyles.textSm]}>Ваши автомобили</Text>
         </View>
 
-        <ScrollView
-            style={styles.content}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-        >
-            {/* Список автомобилей */}
-            <View
-            style={[
-                styles.carsContainer,
-                {
-                flexDirection: isTablet ? 'row' : 'column',
-                flexWrap: isTablet ? 'wrap' : 'nowrap',
-                gap: adaptiveValues.spacing.lg,
-                },
-            ]}
-            >
-            {cars.map((car) => (
-                <TouchableOpacity
-                key={car.id}
-                style={[
-                    styles.carCard,
-                    adaptiveStyles.card,
-                    isTablet && styles.carCardTablet,
-                ]}
-                onPress={() => navigation.navigate('CarDetails')}
-                >
-                <Text style={[styles.carModel, adaptiveStyles.textMd]} numberOfLines={1}>
-                    {car.model}
-                </Text>
-                <Text style={[styles.carPlate, adaptiveStyles.textSm]}>{car.plate}</Text>
-                <Text style={[styles.carMileage, adaptiveStyles.textXs]}>{car.mileage}</Text>
+        <FlatList
+            data={cars}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            numColumns={isTablet ? 2 : 1}
+        />
 
-                {/* Статус автомобиля */}
-                <View style={styles.statusBadge}>
-                    <Text style={[styles.statusText, adaptiveStyles.textXs]}>Активный</Text>
-                </View>
-                </TouchableOpacity>
-            ))}
-            </View>
-
-            {/* Кнопка добавления автомобиля */}
-            <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: '#007AFF' }]}
-            onPress={() => navigation.navigate('AddCar')}
-            >
-            <Text style={[styles.addButtonText, adaptiveStyles.textMd]}>+ Добавить автомобиль</Text>
-            </TouchableOpacity>
-
-            {/* Дополнительные действия */}
-            <View
-            style={[
-                styles.actionsContainer,
-                {
-                flexDirection: isTablet ? 'row' : 'column',
-                gap: adaptiveValues.spacing.md,
-                },
-            ]}
-            >
-            <TouchableOpacity
-                style={[styles.actionButton, adaptiveStyles.card, isTablet && styles.actionButtonTablet]}
-                onPress={() => navigation.navigate('Reminders')}
-            >
-                <Text style={[styles.actionButtonText, adaptiveStyles.textSm]}>Напоминания</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={[styles.actionButton, adaptiveStyles.card, isTablet && styles.actionButtonTablet]}
-                onPress={() => navigation.navigate('History')}
-            >
-                <Text style={[styles.actionButtonText, adaptiveStyles.textSm]}>История обслуживания</Text>
-            </TouchableOpacity>
-            </View>
-
-            {/* Информационный блок */}
-            <View style={[styles.infoCard, adaptiveStyles.card]}>
-            <Text style={[styles.infoTitle, adaptiveStyles.textMd]}>💡 Совет</Text>
-            <Text style={[styles.infoText, adaptiveStyles.textSm]}>
-                Добавляйте автомобили для отслеживания их обслуживания и получения напоминаний
-            </Text>
-            </View>
-
-            {/* Отступ для таб-бара */}
-            <View style={{ height: 20 }} />
-        </ScrollView>
-        </SafeAreaView>
+        <TouchableOpacity style={[styles.fab, isTablet && styles.fabTablet]} onPress={() => navigation.navigate('AddCar' as never)}>
+            <Text style={styles.fabText}>+ Добавить</Text>
+        </TouchableOpacity>
+        </View>
     );
     }
 
     const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        paddingVertical: 16,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    title: {
-        fontWeight: 'bold',
-        color: '#1a1a1a',
-    },
-    subtitle: {
-        color: '#666',
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 16,
-    },
-    scrollContent: {
-        paddingVertical: 16,
-    },
-    carsContainer: {
-        marginBottom: 16,
-    },
-    carCard: {
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    header: { paddingVertical: 16, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
+    headerTitle: { fontWeight: 'bold', color: '#1a1a1a' },
+    headerSub: { color: '#666' },
+    list: { padding: 16, paddingBottom: 100 },
+    card: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         padding: 16,
         marginBottom: 12,
-        backgroundColor: 'white',
+        backgroundColor: '#ffffff',
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
-        position: 'relative',
     },
-    carCardTablet: {
-        width: '48%',
-        marginBottom: 16,
-    },
-    carModel: {
-        fontWeight: 'bold',
-        marginBottom: 4,
-        color: '#1a1a1a',
-    },
-    carPlate: {
-        marginBottom: 4,
-        color: '#666',
-    },
-    carMileage: {
-        color: '#999',
-    },
-    statusBadge: {
+    cardTablet: { width: '48%', marginHorizontal: '1%' },
+    row: { flex: 1 },
+    brand: { fontWeight: '600', color: '#1a1a1a' },
+    model: { color: '#666' },
+    meta: { color: '#999', marginTop: 4 },
+    delete: { padding: 8 },
+    deleteText: { color: '#FF3B30', fontWeight: '500' },
+    fab: {
         position: 'absolute',
-        top: 12,
-        right: 12,
-        backgroundColor: '#E8F5E8',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    statusText: {
-        color: '#27AE60',
-        fontWeight: '500',
-    },
-    addButton: {
+        bottom: 24,
+        right: 24,
+        backgroundColor: '#007AFF',
+        borderRadius: 28,
         paddingVertical: 14,
-        borderRadius: 12,
-        alignItems: 'center',
-        marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        paddingHorizontal: 20,
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
     },
-    addButtonText: {
-        fontWeight: '600',
-        color: 'white',
-    },
-    actionsContainer: {
-        marginBottom: 16,
-    },
-    actionButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-    },
-    actionButtonTablet: {
-        flex: 1,
-    },
-    actionButtonText: {
-        fontWeight: '500',
-        color: '#007AFF',
-        textAlign: 'center',
-    },
-    infoCard: {
-        padding: 16,
-        borderLeftWidth: 4,
-        borderLeftColor: '#2196F3',
-    },
-    infoTitle: {
-        fontWeight: '600',
-        marginBottom: 8,
-        color: '#1976D2',
-    },
-    infoText: {
-        color: '#424242',
-        lineHeight: 20,
-    },
+    fabTablet: { bottom: 32, right: 32, paddingVertical: 16, paddingHorizontal: 24 },
+    fabText: { color: '#ffffff', fontWeight: '600', fontSize: 16 },
     });

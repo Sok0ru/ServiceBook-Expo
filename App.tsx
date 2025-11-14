@@ -1,147 +1,34 @@
-  // App.tsx
   import React from 'react';
   import { NavigationContainer } from '@react-navigation/native';
   import { createNativeStackNavigator } from '@react-navigation/native-stack';
   import { StatusBar } from 'expo-status-bar';
   import { ThemeProvider } from './src/contexts/ThemeContext';
+  import { RootStackParamList } from './src/types/navigation';
 
-  // Import auth screens
-  import EmailLogin from './src/screens/Auth/LoginScreen';
-  import Login from './src/screens/Auth/Login';
+  // Auth
+  import EmailLoginScreen from './src/screens/Auth/EmailLoginScreen';
+  import EmailVerificationScreen from './src/screens/Auth/EmailVerificationScreen';
+  import LoginScreen from './src/screens/Auth/LoginScreen';
   import Registration from './src/screens/Auth/Registration';
 
-  // Import main screens
-  import CarDetails from './src/screens/Main/CarDetails';
-  import Reminders from './src/screens/Main/Reminders';
-  import Filters from './src/screens/Main/Filters';
-  import CreateReminder from './src/screens/Main/CreateReminder';
-  import History from './src/screens/Main/History';
-
-  // Import garage screens
-  import AddCar from './src/screens/Garage/AddCar';
-  import CarModels from './src/screens/Garage/CarModels';
-  import CarGeneration from './src/screens/Garage/CarGeneration';
-  import CarDetailsForm from './src/screens/Garage/CarDetailsForm';
-
-  // Import main navigator
+  // Main
   import AppNavigator from './src/navigation/AppNavigator';
-
-  // Import types
-  import { RootStackParamList } from './src/types/navigation';
-  import EmailVerificationScreen from './src/screens/Auth/EmailVerificationScreen';
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
 
   export default function App() {
     return (
       <ThemeProvider>
-      <NavigationContainer>
-        <StatusBar style="auto" />
-        <Stack.Navigator 
-          initialRouteName="EmailLogin"
-          screenOptions={{
-            headerShown: false
-          }}
-        >
-          {/* Auth Screens - весь flow авторизации */}
-          <Stack.Screen 
-            name="EmailLogin" 
-            component={EmailLogin}
-          />
-          <Stack.Screen 
-            name="EmailVerificationScreen" 
-            component={EmailVerificationScreen}
-          />
-          <Stack.Screen 
-            name="Login" 
-            component={Login}
-          />
-          <Stack.Screen 
-            name="Registration" 
-            component={Registration}
-          />
-          
-          {/* Main App после авторизации */}
-          <Stack.Screen 
-            name="MainTabs" 
-            component={AppNavigator}
-          />
-
-          {/* Individual Screens - доступные из табов */}
-          <Stack.Screen 
-            name="CarDetails" 
-            component={CarDetails}
-            options={{ 
-              headerShown: true,
-              title: 'Детали автомобиля'
-            }}
-          />
-          <Stack.Screen 
-            name="AddCar" 
-            component={AddCar}
-            options={{ 
-              headerShown: true,
-              title: 'Добавить автомобиль'
-            }}
-          />
-          <Stack.Screen 
-            name="History" 
-            component={History}
-            options={{ 
-              headerShown: true,
-              title: 'История'
-            }}
-          />
-          <Stack.Screen 
-            name="Reminders" 
-            component={Reminders}
-            options={{ 
-              headerShown: true,
-              title: 'Напоминания'
-            }}
-          />
-          <Stack.Screen 
-            name="Filters" 
-            component={Filters}
-            options={{ 
-              headerShown: true,
-              title: 'Фильтры'
-            }}
-          />
-          <Stack.Screen 
-            name="CreateReminder" 
-            component={CreateReminder}
-            options={{ 
-              headerShown: true,
-              title: 'Создать напоминание'
-            }}
-          />
-          <Stack.Screen 
-            name="CarModels" 
-            component={CarModels}
-            options={{ 
-              headerShown: true,
-              title: 'Выбор модели'
-            }}
-          />
-          <Stack.Screen 
-            name="CarGeneration" 
-            component={CarGeneration}
-            options={{ 
-              headerShown: true,
-              title: 'Выбор поколения'
-            }}
-          />
-          <Stack.Screen 
-            name="CarDetailsForm" 
-            component={CarDetailsForm}
-            options={{ 
-              headerShown: true,
-              title: 'Детали автомобиля'
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+        <NavigationContainer>
+          <StatusBar style="auto" />
+          <Stack.Navigator initialRouteName="EmailLogin" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="EmailLogin" component={EmailLoginScreen} />
+            <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Registration" component={Registration} />
+            <Stack.Screen name="MainTabs" component={AppNavigator} />
+          </Stack.Navigator>
+        </NavigationContainer>
       </ThemeProvider>
     );
   }

@@ -1,16 +1,22 @@
     import React, { useState } from 'react';
     import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+    import { RouteProp } from '@react-navigation/native';
     import { useNavigation, useRoute } from '@react-navigation/native';
     import { useCodeInput } from '../../hooks/useCodeInput';
     import { authAPI } from '../../api/auth';
     import { setAccessToken } from '../../utils/token';
+    import { RootStackParamList } from '../../types/navigation';
+    import { StackNavigationProp } from '@react-navigation/stack';
+
+    type NavigationProp = StackNavigationProp<RootStackParamList, 'MainTabs'>;
+    type RoutePropT = RouteProp<RootStackParamList, 'EmailVerification'>;
 
     export default function EmailVerificationScreen() {
-    const { email } = useRoute().params as { email: string };
+    const { email } = useRoute<RoutePropT>().params;
     const [password, setPassword] = useState('');
     const { code, refs, onChange, onKeyPress, isComplete } = useCodeInput();
     const [loading, setLoading] = useState(false);
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
 
     const handleSignUp = async () => {
         if (!isComplete) return Alert.alert('Введите 6 цифр');

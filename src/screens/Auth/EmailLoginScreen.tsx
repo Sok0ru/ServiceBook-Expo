@@ -1,12 +1,17 @@
     import React, { useState } from 'react';
     import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+    import { StackNavigationProp } from '@react-navigation/stack';
     import { useNavigation } from '@react-navigation/native';
     import { authAPI } from '../../api/auth';
+    import { RootStackParamList } from '../../types/navigation';
+
+    type NavigationProp = StackNavigationProp<RootStackParamList, 'EmailVerification'>;
 
     export default function EmailLoginScreen() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
+
     const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
     const handleRequestCode = async () => {
@@ -45,7 +50,7 @@
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Отправить код</Text>}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('Login' as never)}>
+        <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('Login')}>
             <Text style={styles.linkText}>Уже есть аккаунт? Войти</Text>
         </TouchableOpacity>
         </View>

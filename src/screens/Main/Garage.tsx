@@ -1,6 +1,6 @@
     import React, { useEffect, useState } from 'react';
     import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
-    import { useNavigation } from '@react-navigation/native';
+    import { CommonActions, useNavigation } from '@react-navigation/native';
     import { StackNavigationProp } from '@react-navigation/stack';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { carsAPI } from '../../api/cars';
@@ -16,6 +16,15 @@
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
     const [cars, setCars] = useState<Car[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const handleFab = () => {
+        navigation.dispatch(
+            CommonActions.navigate({
+                name: 'AddCarStack',
+                params: { screen: 'AddCar' },
+            })
+        );
+    };
 
     const loadCars = async () => {
         try {
@@ -85,12 +94,9 @@
             numColumns={isTablet ? 2 : 1}
         />
 
-            <TouchableOpacity
-            style={[styles.fab, isTablet && styles.fabTablet]}
-            onPress={() => (navigation as any).navigate('AddCarStack')}
-            >
-            <Text style={styles.fabText}>+ Добавить</Text>
-            </TouchableOpacity>
+        <TouchableOpacity style={styles.fab} onPress={handleFab}>
+        <Text style={styles.fabText}>+ Добавить</Text>
+        </TouchableOpacity>
         </View>
     );
     }

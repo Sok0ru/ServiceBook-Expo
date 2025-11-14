@@ -15,6 +15,7 @@
   import AppNavigator from './src/navigation/AppNavigator';
 import Filters from './src/screens/Main/Filters';
 import Reminders from './src/screens/Main/Reminders';
+import CarDetails from './src/screens/Main/CarDetails';
 
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -32,6 +33,7 @@ import Reminders from './src/screens/Main/Reminders';
             <Stack.Screen name="MainTabs" component={AppNavigator} />
             <Stack.Screen name="Filters" component={Filters} />
             <Stack.Screen name="Reminders" component={Reminders} /> 
+            <Stack.Screen name="CarDetails" component={CarDetails} /> 
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>

@@ -170,7 +170,7 @@
                         { 
                             fontSize: labelFontSize,
                             marginTop: labelMarginTop,
-                            lineHeight: labelFontSize * 1.2,
+                            lineHeight: labelFontSize * 1.4,
                         },
                         focused && styles.labelFocused,
                     ]}
@@ -188,8 +188,9 @@
         container: {
             alignItems: 'center',
             justifyContent: 'center',
-            paddingVertical: 4,   
+            paddingVertical: 0, 
             paddingHorizontal: 4,
+            marginBottom:15,
         },
         iconContainer: {
             paddingTop:25,

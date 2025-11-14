@@ -54,6 +54,7 @@ import Reminders from '../screens/Main/Reminders';
                 <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Registration" component={Registration} />
+
             </>
             )}
         </Stack.Navigator>

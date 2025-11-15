@@ -17,6 +17,7 @@
       Garage: undefined;
       History: undefined;
       CarDetails: { carId: string };
+      AddCarStackNavigator:undefined;
       
 
     };
@@ -25,7 +26,9 @@
       Garage: undefined;
       History: undefined;
       Settings: undefined;
-      AddCarStack: undefined;  
+      MainTabs:undefined;
+      MainTabBar:undefined;
+      AddCarStack: { screen?: 'AddCar' | 'CarModels' | 'CarGeneration' | 'CarDetailsForm' }; 
     };
 
     export type AddCarStackParamList = {

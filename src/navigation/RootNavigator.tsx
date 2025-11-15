@@ -15,8 +15,9 @@
     // Main
     import AppNavigator from './AppNavigator';
     import CarDetails from '../screens/Main/CarDetails';
-import Filters from '../screens/Main/Filters';
-import Reminders from '../screens/Main/Reminders';
+    import Filters from '../screens/Main/Filters';
+    import Reminders from '../screens/Main/Reminders';
+    import AddCarStackNavigator from './AddCarStackNavigator';
 
     const Stack = createStackNavigator<RootStackParamList>();
 
@@ -45,6 +46,7 @@ import Reminders from '../screens/Main/Reminders';
             <>
                 <Stack.Screen name="MainTabs" component={AppNavigator} />
                 <Stack.Screen name="CarDetails" component={CarDetails} />
+                <Stack.Screen name="AddCarStackNavigator" component={AddCarStackNavigator} />
             </>
             ) : (
             <>

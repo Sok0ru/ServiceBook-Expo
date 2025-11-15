@@ -4,9 +4,11 @@
     import { useNavigation, useRoute } from '@react-navigation/native';
     import { useCodeInput } from '../../hooks/useCodeInput';
     import { authAPI } from '../../api/auth';
-    import { setAccessToken } from '../../utils/token';
+
     import { RootStackParamList } from '../../types/navigation';
     import { StackNavigationProp } from '@react-navigation/stack';
+    import { setToken } from '../../utils/tokenSync';
+
 
     type NavigationProp = StackNavigationProp<RootStackParamList, 'MainTabs'>;
     type RoutePropT = RouteProp<RootStackParamList, 'EmailVerification'>;
@@ -26,7 +28,7 @@
         const codeNum = Number(code.join(''));
         console.log('👉 signUp body:', { email, password, code: codeNum });
         const { jwt } = await authAPI.signUp(email, password, codeNum);
-        await setAccessToken(jwt.accessToken);
+        await setToken(jwt.accessToken);
         navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (e: any) {
         Alert.alert('Ошибка', e.response?.data?.description || 'Неверный код');

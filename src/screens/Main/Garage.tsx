@@ -6,7 +6,7 @@
     import { carsAPI } from '../../api/cars';
     import { RootStackParamList, Car, MainTabParamList } from '../../types/navigation';
     import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-
+    import * as SecureStore from 'expo-secure-store';
     type NavigationProp = StackNavigationProp<RootStackParamList, 'CarDetails'>;
     type GarageNavProp = BottomTabNavigationProp<MainTabParamList, 'Garage'>;
     type RootNav = StackNavigationProp<RootStackParamList>;
@@ -18,23 +18,36 @@
     const [loading, setLoading] = useState(true);
 
     const handleFab = () => {
-        navigation.dispatch(
-            CommonActions.navigate({
-                name: 'AddCarStack',
-                params: { screen: 'AddCar' },
-            })
-        );
+    (navigation as any).navigate('AddCarStack', { screen: 'AddCar' });
     };
 
     const loadCars = async () => {
-        try {
+    setLoading(true);
+    const token = await SecureStore.getItemAsync('access');
+    if (!token) {
+        Alert.alert('Ошибка', 'Требуется авторизация');
+        navigation.navigate('EmailLogin');
+        setLoading(false);
+        return;
+    }
+    try {
         const data = await carsAPI.list();
         setCars(data);
-        } catch (e: any) {
-        Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось загрузить машины');
-        } finally {
-        setLoading(false);
+    } catch (e: any) {
+        if (e.response?.status === 401) {
+        await SecureStore.deleteItemAsync('access');
+        Alert.alert('Сессия истекла', 'Пожалуйста, войдите снова');
+        navigation.navigate('EmailLogin');
+        } else {
+        const mockCars: Car[] = [
+            { id: '1', brand: 'Toyota', model: 'Camry', year: 2022, mileage: 45000 },
+            { id: '2', brand: 'BMW', model: 'X5', year: 2021, mileage: 38000 },
+        ];
+        setCars(mockCars);
         }
+    } finally {
+        setLoading(false);
+    }
     };
 
     useEffect(() => {
@@ -103,7 +116,7 @@
 
     const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
-    header: { paddingVertical: 16, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
+    header: { paddingVertical: 16, marginTop:40, marginHorizontal:0,backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
     headerTitle: { fontWeight: 'bold', color: '#1a1a1a' },
     headerSub: { color: '#666' },
     list: { padding: 16, paddingBottom: 100 },

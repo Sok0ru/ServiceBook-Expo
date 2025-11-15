@@ -3,9 +3,9 @@
     import { StackNavigationProp } from '@react-navigation/stack';
     import { useNavigation } from '@react-navigation/native';
     import { authAPI } from '../../api/auth';
-    import { setAccessToken } from '../../utils/token';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
     import { RootStackParamList } from '../../types/navigation';
+    import { setToken } from '../../utils/tokenSync';
 
     type NavigationProp = StackNavigationProp<RootStackParamList, 'MainTabs'>;
 
@@ -24,7 +24,7 @@
         setLoading(true);
         try {
         const { jwt } = await authAPI.logIn(email, password);
-        await setAccessToken(jwt.accessToken);
+        await setToken(jwt.accessToken);
         navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
         } catch (e: any) {
         Alert.alert('Ошибка', e.response?.data?.message || 'Неверные данные');

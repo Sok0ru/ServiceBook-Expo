@@ -18,6 +18,7 @@
       History: undefined;
       CarDetails: { carId: string };
       AddCarStackNavigator:undefined;
+      LogIn:undefined;
       
 
     };

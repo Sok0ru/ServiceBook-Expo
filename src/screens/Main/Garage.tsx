@@ -6,7 +6,7 @@
     import { carsAPI } from '../../api/cars';
     import { RootStackParamList, Car, MainTabParamList } from '../../types/navigation';
     import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { api } from '../../api/client';
+    import { api } from '../../api/client';
 
     type NavigationProp = StackNavigationProp<RootStackParamList, 'CarDetails'>;
     type GarageNavProp = BottomTabNavigationProp<MainTabParamList, 'Garage'>;
@@ -42,7 +42,6 @@ import { api } from '../../api/client';
                     }
                 }
                 
-                console.log('❌ Ни один endpoint не сработал');
                 return null;
             } catch (error) {
                 console.error('Ошибка тестирования:', error);
@@ -61,7 +60,6 @@ import { api } from '../../api/client';
                 console.log('✅ Получены автомобили:', carsData);
                 setCars(carsData);
             } catch (error) {
-                console.error('❌ Ошибка загрузки автомобилей:', error);
                 Alert.alert('Ошибка', 'Не удалось загрузить список автомобилей');
             } finally {
                 setLoading(false);

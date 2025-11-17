@@ -31,17 +31,6 @@
                     `/cars/destroy/${carId}`
                 ];
                 
-                for (const endpoint of endpoints) {
-                    try {
-                        console.log(`🔄 Пробую endpoint: ${endpoint}`);
-                        const response = await api.delete(endpoint);
-                        console.log(`✅ Работает: ${endpoint}`);
-                        return endpoint;
-                    } catch (error) {
-                        console.log(`❌ Не работает: ${endpoint}`);
-                    }
-                }
-                
                 return null;
             } catch (error) {
                 console.error('Ошибка тестирования:', error);
@@ -218,7 +207,6 @@
                                 }
                             }}
                         >
-                            <Text style={styles.debugButtonText}>🔍 Проверить API</Text>
                         </TouchableOpacity>
                         </View>
                     }
@@ -359,17 +347,5 @@
         emptySubtext: { 
             textAlign: 'center', 
             color: '#999' 
-        },
-        debugButton: {
-            position: 'absolute',
-            bottom: 80,
-            right: 16,
-            backgroundColor: '#FF9500',
-            padding: 12,
-            borderRadius: 8,
-        },
-        debugButtonText: {
-            color: '#ffffff',
-            fontSize: 12,
         },
     });

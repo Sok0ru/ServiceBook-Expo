@@ -10,8 +10,8 @@
         
         // POST /cars/create - создать автомобиль
         add: (car: Omit<Car, 'id'>) => {
-            console.log('📤 POST запрос на: /cars/create', car);
-            return api.post<Car>('/cars/create', car).then((r) => r.data);
+            console.log('📤 POST запрос на: /cars', car);
+            return api.post<Car>('/cars', car).then((r) => r.data);
         },
         
         // PATCH /cars/:id - обновить автомобиль

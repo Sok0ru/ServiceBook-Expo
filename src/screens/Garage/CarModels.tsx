@@ -34,7 +34,7 @@ import React, { useState, useEffect } from 'react';
     
     export default function CarModels({ navigation, route }: Props) {
     const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
-    const { brand } = route.params as unknown as { brand: string };
+    const { brand } = route.params;
 
     const [models, setModels] = useState<CarModel[]>([]);
     const [loading, setLoading] = useState(true);

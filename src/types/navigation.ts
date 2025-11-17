@@ -19,6 +19,9 @@
       CarDetails: { carId: string };
       AddCarStackNavigator:undefined;
       LogIn:undefined;
+      TestNotifications:undefined;
+      CarModels: { brand: string };
+      CarGeneration: { brand: string; model: string };
       
 
     };

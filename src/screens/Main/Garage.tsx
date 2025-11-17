@@ -17,7 +17,37 @@
         const { adaptiveStyles, isTablet } = useAdaptiveStyles();
         const [cars, setCars] = useState<Car[]>([]);
         const [loading, setLoading] = useState(true);
-        const [refreshing, setRefreshing] = useState(false);   
+        const [refreshing, setRefreshing] = useState(false);
+
+        const testDeleteEndpoint = async (carId: string) => {
+            console.log('🔍 Тестирую endpoint удаления для carId:', carId);
+            
+            try {
+                // Попробуем разные варианты endpoints
+                const endpoints = [
+                    `/cars/${carId}`,
+                    `/cars/delete/${carId}`,
+                    `/cars/remove/${carId}`,
+                    `/cars/destroy/${carId}`
+                ];
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        console.log(`🔄 Пробую endpoint: ${endpoint}`);
+                        const response = await api.delete(endpoint);
+                        console.log(`✅ Работает: ${endpoint}`);
+                        return endpoint;
+                    } catch (error) {
+                        console.log(`❌ Не работает: ${endpoint}`);
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Ошибка тестирования:', error);
+                return null;
+            }
+        };        
 
         const handleFab = () => {
             (navigation as any).navigate('AddCarStack', { screen: 'AddCar' });
@@ -171,7 +201,6 @@
                                 Добавьте первый автомобиль, нажав на кнопку ниже
                             </Text>
                             <TouchableOpacity 
-                            style={styles.debugButton}
                             onPress={async () => {
                                 try {
                                     const cars = await carsAPI.list();
@@ -319,17 +348,5 @@
         emptySubtext: { 
             textAlign: 'center', 
             color: '#999' 
-        },
-        debugButton: {
-            position: 'absolute',
-            bottom: 80,
-            right: 16,
-            backgroundColor: '#FF9500',
-            padding: 12,
-            borderRadius: 8,
-        },
-        debugButtonText: {
-            color: '#ffffff',
-            fontSize: 12,
         },
     });

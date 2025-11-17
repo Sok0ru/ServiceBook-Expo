@@ -1,4 +1,4 @@
-    // CarDetailsForm.tsx
+
     import React, { useState } from 'react';
     import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
     import { useNavigation, useRoute } from '@react-navigation/native';
@@ -44,13 +44,9 @@
                 color: form.color || undefined,
             };
 
-            console.log('📤 Отправляю POST /cars с payload:', JSON.stringify(payload, null, 2));
-
         setLoading(true);
         try {
             await carsAPI.add(payload);
-            console.log('✅ Автомобиль успешно добавлен через POST /cars/create');
-            
             // Навигация обратно в гараж
             navigation.dispatch(
                 CommonActions.reset({
@@ -65,7 +61,7 @@
             );
             
         } catch (e: any) {
-            console.error('❌ Ошибка при добавлении автомобиля:', e);
+            console.error(' Ошибка при добавлении автомобиля:', e);
             
             let errorMessage = 'Не удалось добавить автомобиль';
             if (e.response?.data?.message) {

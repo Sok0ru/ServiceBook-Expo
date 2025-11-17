@@ -109,7 +109,7 @@
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
-            numColumns={isTablet ? 2 : 1} // ← 2 колонки на планшете
+            numColumns={isTablet ? 2 : 1} 
             />
         )}
         </SafeAreaView>

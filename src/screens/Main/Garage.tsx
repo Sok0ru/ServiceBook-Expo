@@ -17,37 +17,7 @@
         const { adaptiveStyles, isTablet } = useAdaptiveStyles();
         const [cars, setCars] = useState<Car[]>([]);
         const [loading, setLoading] = useState(true);
-        const [refreshing, setRefreshing] = useState(false);
-
-        const testDeleteEndpoint = async (carId: string) => {
-            console.log('🔍 Тестирую endpoint удаления для carId:', carId);
-            
-            try {
-                // Попробуем разные варианты endpoints
-                const endpoints = [
-                    `/cars/${carId}`,
-                    `/cars/delete/${carId}`,
-                    `/cars/remove/${carId}`,
-                    `/cars/destroy/${carId}`
-                ];
-                
-                for (const endpoint of endpoints) {
-                    try {
-                        console.log(`🔄 Пробую endpoint: ${endpoint}`);
-                        const response = await api.delete(endpoint);
-                        console.log(`✅ Работает: ${endpoint}`);
-                        return endpoint;
-                    } catch (error) {
-                        console.log(`❌ Не работает: ${endpoint}`);
-                    }
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Ошибка тестирования:', error);
-                return null;
-            }
-        };        
+        const [refreshing, setRefreshing] = useState(false);   
 
         const handleFab = () => {
             (navigation as any).navigate('AddCarStack', { screen: 'AddCar' });
@@ -55,9 +25,9 @@
 
         const loadCars = async () => {
             try {
-                console.log('🔄 Загружаю список автомобилей...');
+                console.log(' Загружаю список автомобилей...');
                 const carsData = await carsAPI.list();
-                console.log('✅ Получены автомобили:', carsData);
+                console.log(' Получены автомобили:', carsData);
                 setCars(carsData);
             } catch (error) {
                 Alert.alert('Ошибка', 'Не удалось загрузить список автомобилей');
@@ -75,7 +45,6 @@
         // Обновление при фокусе на экране
         useFocusEffect(
             React.useCallback(() => {
-                console.log('🎯 Экран Garage получил фокус, обновляю данные...');
                 loadCars();
             }, [])
         );
@@ -94,21 +63,16 @@
                 style: 'destructive',
                 onPress: async () => {
                     try {
-                        console.log('🗑️ Удаляю автомобиль ID:', id);
-                        
-                        // 🔴 РАСКОММЕНТИРУЙТЕ КОГДА ENDPOINT БУДЕТ ИЗВЕСТЕН:
+                        console.log(' Удаляю автомобиль ID:', id);
                         await carsAPI.delete(id);
-                        console.log('✅ Автомобиль удален с сервера');
+                        console.log(' Автомобиль удален с сервера');
                         
-                        // Удаляем из локального состояния
                         setCars((prev) => prev.filter((c) => c.id !== id));
                         
                         Alert.alert('Успешно', 'Автомобиль удален');
                         
                     } catch (e: any) {
-                        console.error('❌ Ошибка удаления:', e);
                         
-                        // Детали ошибки
                         console.log('🔍 Детали ошибки:', {
                             status: e.response?.status,
                             data: e.response?.data,
@@ -209,16 +173,12 @@
                             <TouchableOpacity 
                             style={styles.debugButton}
                             onPress={async () => {
-                                console.log('🔍 Проверяю API endpoints...');
                                 try {
                                     const cars = await carsAPI.list();
-                                    console.log('✅ GET /cars работает:', cars);
                                 } catch (error) {
-                                    console.error('❌ GET /cars не работает:', error);
                                 }
                             }}
                         >
-                            <Text style={styles.debugButtonText}>🔍 Проверить API</Text>
                         </TouchableOpacity>
                         </View>
                     }

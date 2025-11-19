@@ -13,12 +13,11 @@
 
   // Main
   import AppNavigator from './src/navigation/AppNavigator';
-import Filters from './src/screens/Main/Filters';
-import Reminders from './src/screens/Main/Reminders';
-import CarDetails from './src/screens/Main/CarDetails';
-import CreateReminder from './src/screens/Main/CreateReminder';
-import AddCarStackNavigator from './src/navigation/AddCarStackNavigator';
-import TestNotificationsScreen from './src/screens/Main/TestNotificationsScreen';
+  import Filters from './src/screens/Main/Filters';
+  import Reminders from './src/screens/Main/Reminders';
+  import CarDetails from './src/screens/Main/CarDetails';
+  import CreateReminder from './src/screens/Main/CreateReminder';
+  import AddCarStackNavigator from './src/navigation/AddCarStackNavigator';
 
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,7 +38,6 @@ import TestNotificationsScreen from './src/screens/Main/TestNotificationsScreen'
             <Stack.Screen name="CarDetails" component={CarDetails} /> 
             <Stack.Screen name="CreateReminder" component={CreateReminder} />
             <Stack.Screen name="AddCarStackNavigator" component={AddCarStackNavigator} />
-            <Stack.Screen name="TestNotifications" component={TestNotificationsScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>

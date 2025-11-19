@@ -1,11 +1,10 @@
-    // src/api/client.ts
     import axios from 'axios';
     import Constants from 'expo-constants';
     import { Platform } from 'react-native';
     import { getToken, setToken } from '../utils/tokenSync';
 
     const BASE_URL =
-    Constants.manifest?.extra?.apiUrl ??
+    Constants.extra?.apiUrl ??
     (Platform.OS === 'web'
         ? 'http://servicebook.sashaprok.ru/api'
         : 'http://servicebook.sashaprok.ru/api');

@@ -1,3 +1,4 @@
+    // src/contexts/NotificationContext.tsx
     import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
     import { Alert } from 'react-native';
     import * as Notifications from 'expo-notifications';
@@ -14,6 +15,7 @@
         carId: string;
         delaySeconds: number;
     }) => Promise<void>;
+    cancelReminder: (notificationId: string) => Promise<void>;
     }
 
     const NotificationContext = createContext<SimpleNotificationContext | undefined>(undefined);
@@ -21,14 +23,19 @@
     export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [hasPermission, setHasPermission] = useState(false);
     const notificationListener = useRef<Notifications.Subscription | null>(null);
-    const responseListener = useRef<Notifications.Subscription | null>(null);
+    const responseListener     = useRef<Notifications.Subscription | null>(null);
 
     useEffect(() => {
         checkPermissions();
         setupNotificationListeners();
+
         return () => {
-        notificationListener.current?.remove();
-        responseListener.current?.remove();
+        if (notificationListener.current) {
+            notificationListener.current.remove();
+        }
+        if (responseListener.current) {
+            responseListener.current.remove();
+        }
         };
     }, []);
 
@@ -44,11 +51,20 @@
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
         console.log('👆 Пользователь нажал на уведомление:', response);
-        const data = response.notification.request.content.data;
-        if (data.type === 'reminder') {
-            Alert.alert('Напоминание', `Переход к напоминанию: ${data.reminderId}`);
-        }
+        handleNotificationClick(response);
         });
+    };
+
+    const handleNotificationClick = (response: any) => {
+        const data = response.notification.request.content.data;
+        
+        switch (data.type) {
+        case 'reminder':
+            Alert.alert('Напоминание', `Переход к напоминанию: ${data.reminderId}`);
+            break;
+        default:
+            console.log('Уведомление кликнуто:', data);
+        }
     };
 
     const requestPermission = async (): Promise<boolean> => {
@@ -62,7 +78,13 @@
         Alert.alert('Ошибка', 'Нет разрешений на уведомления');
         return;
         }
+
+        try {
         await NotificationService.showInstantNotification(title, body, data);
+        } catch (error) {
+        console.error('Ошибка показа уведомления:', error);
+        Alert.alert('Ошибка', 'Не удалось показать уведомление');
+        }
     };
 
     const scheduleReminder = async (options: {
@@ -76,8 +98,22 @@
         Alert.alert('Ошибка', 'Нет разрешений на уведомления');
         return;
         }
+
+        try {
         await NotificationService.createReminder(options);
-        Alert.alert('Успех', `Напоминание создано на ${options.delaySeconds} секунд`);
+        } catch (error) {
+        console.error('Ошибка создания напоминания:', error);
+        Alert.alert('Ошибка', 'Не удалось создать напоминание');
+        }
+    };
+
+    const cancelReminder = async (notificationId: string): Promise<void> => {
+        try {
+        await NotificationService.cancelNotification(notificationId);
+        console.log('✅ Уведомление отменено:', notificationId);
+        } catch (error) {
+        console.error('❌ Ошибка отмены уведомления:', error);
+        }
     };
 
     const value: SimpleNotificationContext = {
@@ -85,13 +121,20 @@
         requestPermission,
         showNotification,
         scheduleReminder,
+        cancelReminder,
     };
 
-    return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
+    return (
+        <NotificationContext.Provider value={value}>
+        {children}
+        </NotificationContext.Provider>
+    );
     };
 
     export const useNotification = (): SimpleNotificationContext => {
     const context = useContext(NotificationContext);
-    if (!context) throw new Error('useNotification must be used within NotificationProvider');
+    if (context === undefined) {
+        throw new Error('useNotification must be used within a NotificationProvider');
+    }
     return context;
     };

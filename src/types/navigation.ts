@@ -1,3 +1,4 @@
+    import { Reminder } from '../api/reminders';
     export type RootStackParamList = {
       // Auth flow
       Main:undefined;
@@ -11,9 +12,9 @@
       
       // Individual screens (если нужен прямой доступ)
       Dashboard: undefined;
-      Reminders: undefined;
+      Reminders: {carId: string};
       Filters: undefined;
-      CreateReminder: undefined;
+      CreateReminder: { carId: string; editReminder?: Reminder };
       Garage: undefined;
       History: undefined;
       CarDetails: { carId: string };

@@ -6,7 +6,7 @@
     requestCode: (email: string) =>
         api.post('/email/request', { email }).then(() => null),
 
-    signUp: (email: string, password: string, code: number) =>   // ← number
+    signUp: (email: string, password: string, code: number) => 
         api.post<{ id: string; jwt: JwtPair }>('/user/sign-up', { email, password, code })
         .then(r => r.data),
 

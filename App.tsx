@@ -19,12 +19,16 @@
   import CreateReminder from './src/screens/Main/CreateReminder';
   import AddCarStackNavigator from './src/navigation/AddCarStackNavigator';
 
+  import { NotificationProvider } from './src/contexts/NotificationContext';
+  import SelectCarForReminder from './src/screens/Main/SelectCarForReminder';
+
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
 
   export default function App() {
     return (
       <ThemeProvider>
+      <NotificationProvider>
         <NavigationContainer>
           <StatusBar style="auto" />
           <Stack.Navigator initialRouteName="EmailLogin" screenOptions={{ headerShown: false }}>
@@ -38,8 +42,10 @@
             <Stack.Screen name="CarDetails" component={CarDetails} /> 
             <Stack.Screen name="CreateReminder" component={CreateReminder} />
             <Stack.Screen name="AddCarStackNavigator" component={AddCarStackNavigator} />
+            <Stack.Screen name="SelectCarForReminder" component={SelectCarForReminder} />
           </Stack.Navigator>
         </NavigationContainer>
+      </NotificationProvider>
       </ThemeProvider>
     );
   }

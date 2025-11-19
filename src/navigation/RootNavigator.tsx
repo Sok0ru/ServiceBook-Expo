@@ -18,6 +18,7 @@
     import Filters from '../screens/Main/Filters';
     import Reminders from '../screens/Main/Reminders';
     import AddCarStackNavigator from './AddCarStackNavigator';
+    import SelectCarForReminder from '../screens/Main/SelectCarForReminder';
 
     const Stack = createStackNavigator<RootStackParamList>();
 
@@ -56,6 +57,7 @@
                 <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Registration" component={Registration} />
+                <Stack.Screen name="SelectCarForReminder" component={SelectCarForReminder} />
 
             </>
             )}

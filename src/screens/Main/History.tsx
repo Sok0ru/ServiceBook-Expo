@@ -1,142 +1,73 @@
-    import React from 'react';
-    import {
-    View,
-    Text,
-    ScrollView,
-    StyleSheet,
-    } from 'react-native';
+    import React, { useEffect, useState } from 'react';
+    import { View, Text, FlatList, StyleSheet } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
+    import { RouteProp, useRoute } from '@react-navigation/native';
+    import { RootStackParamList, Reminder } from '../../types/navigation';
+    import { remindersAPI } from '../../api/reminders';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
 
-    export default function History() {
-    const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
+    type RouteT = RouteProp<RootStackParamList, 'History'>;
 
-    const historyItems = [
-        {
-        id: '1',
-        date: '15.12.2023',
-        service: 'Замена масла двигателя',
-        cost: '5 000 ₽',
-        },
-        {
-        id: '2',
-        date: '20.11.2023',
-        service: 'Замена тормозных колодок',
-        cost: '8 500 ₽',
-        },
-        {
-        id: '3',
-        date: '05.10.2023',
-        service: 'Техническое обслуживание',
-        cost: '12 000 ₽',
-        },
-    ];
+    const safeDate = (ts?: number) => (ts ? new Date(ts).toLocaleDateString('ru-RU') : '—');
+
+    export default function History() {
+    const route = useRoute<RouteT>();
+    const { adaptiveStyles, isTablet } = useAdaptiveStyles();
+    const carId = route.params?.carId || '';
+
+    const [reminders, setReminders] = useState<Reminder[]>([]);
+
+    useEffect(() => {
+        (async () => {
+        try {
+            const res = await remindersAPI.getByCar(carId);
+            const data: Reminder[] = (await remindersAPI.getByCar(carId)) as Reminder[];
+            setReminders(data);
+        } catch (e) {
+            console.error(e);
+        }
+        })();
+    }, [carId]);
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={[styles.header, adaptiveStyles.container]}>
-            <Text style={[styles.title, adaptiveStyles.textXl]}>История</Text>
-            <Text style={[styles.subtitle, adaptiveStyles.textSm]}>История обслуживания</Text>
-        </View>
-
-        <ScrollView
-            style={styles.content}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-        >
-            <View
-            style={[
-                styles.historyGrid,
-                {
-                flexDirection: isTablet ? 'row' : 'column',
-                flexWrap: isTablet ? 'wrap' : 'nowrap',
-                gap: adaptiveValues.spacing.lg,
-                },
-            ]}
-            >
-            {historyItems.map((item) => (
-                <View
-                key={item.id}
-                style={[
-                    styles.historyCard,
-                    adaptiveStyles.card,
-                    isTablet && styles.historyCardTablet,
-                ]}
-                >
-                <View style={styles.historyHeader}>
-                    <Text style={[styles.historyDate, adaptiveStyles.textSm]}>{item.date}</Text>
-                    <Text style={[styles.historyCost, adaptiveStyles.textMd]}>{item.cost}</Text>
+        <FlatList
+            data={reminders}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.content}
+            renderItem={({ item }) => (
+            <View style={[styles.card, adaptiveStyles.card, isTablet && styles.cardTablet]}>
+                <View style={styles.row}>
+                <Text style={[styles.name, adaptiveStyles.textMd]}>{item.name}</Text>
+                <Text style={[styles.tag, adaptiveStyles.textSm]}>{item.tag}</Text>
                 </View>
-                <Text style={[styles.historyService, adaptiveStyles.textMd]}>{item.service}</Text>
+                <View style={styles.detailRow}>
+                {item.noticeType === 'mileage' && item.mileageNotice && (
+                    <Text style={styles.detail}>📏 {item.mileageNotice.toLocaleString()} км</Text>
+                )}
+                {item.noticeType === 'date' && item.dateNotice && (
+                    <Text style={styles.detail}>📅 {safeDate(item.dateNotice)}</Text>
+                )}
                 </View>
-            ))}
             </View>
-
-            {/* Отступ для таб-бара */}
-            <View style={{ height: 20 }} />
-        </ScrollView>
+            )}
+            ListEmptyComponent={
+            <Text style={[styles.empty, adaptiveStyles.textMd]}>Нет записей</Text>
+            }
+        />
         </SafeAreaView>
     );
     }
 
     const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        paddingVertical: 16,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    title: {
-        fontWeight: 'bold',
-        color: '#1a1a1a',
-    },
-    subtitle: {
-        color: '#666',
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 16,
-    },
-    scrollContent: {
-        paddingVertical: 16,
-    },
-    historyGrid: {
-        marginTop: 8,
-    },
-    historyCard: {
-        padding: 16,
-        marginBottom: 12,
-        backgroundColor: 'white',
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    historyCardTablet: {
-        width: '48%',
-    },
-    historyHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    historyDate: {
-        color: '#666',
-        fontWeight: '500',
-    },
-    historyCost: {
-        color: '#007AFF',
-        fontWeight: '600',
-    },
-    historyService: {
-        color: '#1a1a1a',
-        fontWeight: '500',
-    },
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    content: { padding: 16 },
+    card: { padding: 16, marginBottom: 12, backgroundColor: '#fff', borderRadius: 12, elevation: 2 },
+    cardTablet: { width: '48%', marginHorizontal: '1%' },
+    row: { flexDirection: 'row', justifyContent: 'space-between' },
+    name: { fontWeight: '600', color: '#1a1a1a' },
+    tag: { color: '#007AFF' },
+    detailRow: { marginTop: 6 },
+    detail: { color: '#666', fontSize: 12 },
+    empty: { textAlign: 'center', marginTop: 60, color: '#666' },
     });

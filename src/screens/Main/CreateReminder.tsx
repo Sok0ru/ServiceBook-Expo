@@ -8,6 +8,7 @@
     TextInput,
     Switch,
     Alert,
+    FlatList,
     } from 'react-native';
     import { SafeAreaView } from 'react-native-safe-area-context';
     import { StackNavigationProp } from '@react-navigation/stack';
@@ -17,425 +18,300 @@
     import { remindersAPI, CreateReminderData } from '../../api/reminders';
     import { useNotification } from '../../contexts/NotificationContext';
     import { Reminder } from '../../api/reminders';
+    import { getToken } from '../../utils/tokenSync';
+    import { carsAPI } from '../../api/cars';
 
-    type CreateReminderScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CreateReminder'>;
-    type CreateReminderRouteProp = RouteProp<RootStackParamList, 'CreateReminder'>;
+    type NavProp = StackNavigationProp<RootStackParamList, 'CreateReminder'>;
+    type RoutePropT = RouteProp<RootStackParamList, 'CreateReminder'>;
 
-    type ReminderType = 'замена' | 'проверка';
+    type NoticeType = 'mileage' | 'date';
+
+    const PRESET_TAGS = [
+    'Ходовая часть',
+    'Двигатель',
+    'Электрика',
+    'Тормозная система',
+    'Трансмиссия',
+    'Салон / Комфорт',
+    ] as const;
+
+    const safeDate = (iso?: string): string => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime())
+        ? ''
+        : `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    };
 
     export default function CreateReminder() {
-    const navigation = useNavigation<CreateReminderScreenNavigationProp>();
-    const route = useRoute<CreateReminderRouteProp>();
+    const [carName, setCarName] = useState('');
+    const nav = useNavigation<NavProp>();
+    const route = useRoute<RoutePropT>();
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
     const { scheduleReminder, cancelReminder } = useNotification();
 
-    const carId = route.params?.carId || 'default-car-id';
-    const isEditing   = Boolean(route.params?.editReminder);
+    const carId = route.params?.carId || ''; 
+    if (!carId) {
+    Alert.alert('Ошибка', 'Не выбрана машина');
+    nav.goBack();
+    return;
+    }
+    const isEditing = Boolean(route.params?.editReminder);
     const editReminder = route.params?.editReminder as Reminder | undefined;
-    const [reminder, setReminder] = useState({
-        title: '',
-        type: 'замена' as ReminderType,
-        mileage: '',
-        date: '',
-        noticeDate: '',
-        enabled: true,
-    });
 
-    const [selectedOptions, setSelectedOptions] = useState({
-        действие: false,
-        пробег: true,
-        время: true,
-        уведомление: true,
-    });
-
+    /* --------- state ---------- */
+    const [name, setName] = useState('');
+    const [tag, setTag] = useState('');
+    const [customTag, setCustomTag] = useState('');
+    const [noticeType, setNoticeType] = useState<NoticeType>('date');
+    const [mileageNotice, setMileageNotice] = useState('');
+    const [dateNotice, setDateNotice] = useState('');
+    const [enabled, setEnabled] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    const toggleOption = (option: keyof typeof selectedOptions) => {
-        setSelectedOptions({
-        ...selectedOptions,
-        [option]: !selectedOptions[option],
-        });
-    };
-
-    const calculateNoticeDate = (baseDate: string): string => {
-        if (!baseDate) return '';
-        
-        const date = new Date(baseDate);
-        date.setDate(date.getDate() - 7); // Уведомление за 7 дней
-        return date.toISOString().split('T')[0];
-    };
-
-    // Автоматически рассчитываем дату уведомления при изменении основной даты
+    /* --------- preload ---------- */
     useEffect(() => {
-        if (selectedOptions.уведомление && reminder.date) {
-        const noticeDate = calculateNoticeDate(reminder.date);
-        setReminder(prev => ({ ...prev, noticeDate }));
+    const loadCar = async () => {
+        const cars = await carsAPI.list();
+        const car = cars.find(c => c.id === carId);
+        if (car) setCarName(`${car.brand} ${car.model}`);
+    };
+    if (carId) loadCar();
+        }, [isEditing, editReminder]);
+
+    /* --------- handlers ---------- */
+        const token = getToken();
+        if (!token) {
+        Alert.alert('Ошибка', 'Вы не авторизованы. Войдите в аккаунт');
+        nav.navigate('LogIn');
+        return;
         }
-    }, [reminder.date, selectedOptions.уведомление]);
+    const handleSave = async () => {
+        if (!name.trim()) return Alert.alert('Ошибка', 'Введите название');
+        const finalTag = tag === 'Свой вариант' ? customTag.trim() : tag;
+        if (!finalTag) return Alert.alert('Ошибка', 'Выберите или введите тег');
 
-  const handleCreateReminder = async () => {
-    if (!reminder.title.trim()) {
-      Alert.alert('Ошибка', 'Введите название напоминания');
-      return;
-    }
+        const data: CreateReminderData = {
+        name,
+        tag: finalTag,
+        noticeType,
+        mileageNotice: noticeType === 'mileage' ? parseInt(mileageNotice) || 0 : undefined,
+        dateNotice: noticeType === 'date' && dateNotice ? new Date(dateNotice).getTime() : undefined,
+        enabled,
+        };
+        console.log('📤 POST /api/details/{carId}', {
+            carId,
+            body: {
+            name,
+            tag: finalTag,
+            noticeType,
+            mileageNotice: noticeType === 'mileage' ? parseInt(mileageNotice) || 0 : undefined,
+            dateNotice: noticeType === 'date' && dateNotice ? new Date(dateNotice).getTime() : undefined,
+            enabled,
+            },
+        });
+        console.log('📤 Создаю для carId:', carId, data);
 
-    setLoading(true);
 
-    try {
-      const reminderData: CreateReminderData = {
-        title: reminder.title,
-        type: reminder.type,
-        enabled: reminder.enabled,
-        mileage: selectedOptions.пробег && reminder.mileage ? parseInt(reminder.mileage) : undefined,
-        date: selectedOptions.время && reminder.date ? reminder.date : undefined,
-        noticeDate: selectedOptions.уведомление && reminder.noticeDate ? reminder.noticeDate : undefined,
-      };
-
-      console.log(`📤 ${isEditing ? 'Обновляю' : 'Создаю'} напоминание:`, reminderData);
-
-      let createdReminder: Reminder;
-
-      if (isEditing && editReminder) {
-        // Режим редактирования
-        createdReminder = await remindersAPI.update(carId, editReminder.id, reminderData);
-        console.log('✅ Напоминание обновлено:', createdReminder);
-        
-        // Отменяем старое уведомление
-        await cancelReminder(editReminder.id);
-      } else {
-        // Режим создания
-        createdReminder = await remindersAPI.create(carId, reminderData);
-        console.log('✅ Напоминание создано:', createdReminder);
-      }
-
-      // Создаем новое локальное уведомление если включено и указана дата
-      if (reminder.enabled && reminder.noticeDate) {
+        setLoading(true);
         try {
-          const noticeDate = new Date(reminder.noticeDate);
-          const delaySeconds = Math.max(0, (noticeDate.getTime() - Date.now()) / 1000);
-          
-          if (delaySeconds > 0) {
+        if (isEditing && editReminder) {
+            const updated = await remindersAPI.update(carId, editReminder.id, data);
+            await cancelReminder(updated.id);
+            if (updated.enabled && updated.dateNotice) {
             await scheduleReminder({
-              id: createdReminder.id,
-              title: `Напоминание: ${reminder.title}`,
-              message: `Не забудьте ${reminder.type === 'замена' ? 'заменить' : 'проверить'} ${reminder.title}`,
-              carId: carId,
-              delaySeconds: delaySeconds,
+                id: updated.id,
+                title: `Напоминание: ${updated.name}`,
+                message: `Пора проверить ${updated.name}`,
+                carId,
+                delaySeconds: Math.max(0, (updated.dateNotice - Date.now()) / 1000),
             });
-            console.log('✅ Локальное уведомление создано');
-          }
-        } catch (notificationError) {
-          console.error('❌ Ошибка создания уведомления:', notificationError);
+            }
+        } else {
+            const created = await remindersAPI.create(carId, data);
+            if (created.enabled && created.dateNotice) {
+            await scheduleReminder({
+                id: created.id,
+                title: `Напоминание: ${created.name}`,
+                message: `Пора проверить ${created.name}`,
+                carId,
+                delaySeconds: Math.max(0, (created.dateNotice - Date.now()) / 1000),
+            });
+            }
         }
-      }
-
-      Alert.alert('Успех', `Напоминание ${isEditing ? 'обновлено' : 'создано'}!`, [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-
-    } catch (error: any) {
-      console.error(`❌ Ошибка ${isEditing ? 'обновления' : 'создания'} напоминания:`, error);
-      Alert.alert(
-        'Ошибка',
-        error.response?.data?.message || `Не удалось ${isEditing ? 'обновить' : 'создать'} напоминание`
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
+        Alert.alert('Успех', `Напоминание ${isEditing ? 'обновлено' : 'создано'}!`, [
+            { text: 'OK', onPress: () => nav.goBack() },
+        ]);
+        } catch (e: any) {
+            console.error('❌ Ответ сервера:', {
+            status: e.response?.status,
+            data: e.response?.data,
+            headers: e.response?.headers,
+            });
+            Alert.alert(
+            'Ошибка',
+            e.response?.data?.message || JSON.stringify(e.response?.data) || 'Не удалось сохранить'
+            );
+        } finally {
+            setLoading(false);
+        }
+        };
+    console.log('📤 Создаю для carId:', carId); 
+    /* --------- UI ---------- */
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
-        <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-        >
-            <Text style={[styles.title, adaptiveStyles.textXl]}>Создать напоминание</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.subtitle}>{carName || 'Машина'}</Text>
+            <Text style={[styles.title, adaptiveStyles.textXl]}>{isEditing ? 'Редактировать' : 'Создать'} напоминание</Text>
 
-            {/* Основная информация */}
+            {/* Название */}
             <View style={[styles.section, adaptiveStyles.card]}>
-            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>ОСНОВНАЯ ИНФОРМАЦИЯ</Text>
-
+            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>НАЗВАНИЕ</Text>
             <TextInput
                 style={[styles.input, adaptiveStyles.textSm]}
-                placeholder="Название напоминания *"
-                placeholderTextColor="#999"
-                value={reminder.title}
-                onChangeText={(text) => setReminder({ ...reminder, title: text })}
+                placeholder="Например, Замена масла"
+                value={name}
+                onChangeText={setName}
             />
+            </View>
 
-            <View style={styles.typeContainer}>
-                <Text style={[styles.typeLabel, adaptiveStyles.textMd]}>Тип:</Text>
-                <View
-                style={[
-                    styles.typeButtons,
-                    { flexDirection: isTablet ? 'row' : 'column' },
-                ]}
+            {/* Тег */}
+            <View style={[styles.section, adaptiveStyles.card]}>
+            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>ТЕГ</Text>
+            <FlatList
+                data={[...PRESET_TAGS, 'Свой вариант']}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                <TouchableOpacity
+                    style={[styles.tagButton, tag === item && styles.tagSelected]}
+                    onPress={() => {
+                    setTag(item);
+                    if (item !== 'Свой вариант') setCustomTag('');
+                    }}
                 >
-                {(['замена', 'проверка'] as ReminderType[]).map((type) => (
+                    <Text style={[styles.tagText, tag === item && styles.tagTextSelected]}>{item}</Text>
+                </TouchableOpacity>
+                )}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 8 }}
+            />
+            {tag === 'Свой вариант' && (
+                <TextInput
+                style={[styles.input, adaptiveStyles.textSm]}
+                placeholder="Введите свой тег"
+                value={customTag}
+                onChangeText={setCustomTag}
+                />
+            )}
+            </View>
+
+            {/* Когда напомнить */}
+            <View style={[styles.section, adaptiveStyles.card]}>
+            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>КОГДА НАПОМНИТЬ</Text>
+            <View style={styles.optionRow}>
+                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Тип</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                {(['mileage', 'date'] as const).map((t) => (
                     <TouchableOpacity
-                    key={type}
-                    style={[
-                        styles.typeButton,
-                        reminder.type === type && styles.typeButtonSelected,
-                    ]}
-                    onPress={() => setReminder({ ...reminder, type })}
+                    key={t}
+                    style={[styles.miniButton, noticeType === t && styles.miniSelected]}
+                    onPress={() => setNoticeType(t)}
                     >
-                    <Text
-                        style={[
-                        styles.typeButtonText,
-                        reminder.type === type && styles.typeButtonTextSelected,
-                        ]}
-                    >
-                        {type}
+                    <Text style={[styles.miniText, noticeType === t && styles.miniTextSelected]}>
+                        {t === 'mileage' ? 'По пробегу' : 'По дате'}
                     </Text>
                     </TouchableOpacity>
                 ))}
                 </View>
             </View>
-            </View>
 
-            {/* Настройки напоминания */}
-            <View style={[styles.section, adaptiveStyles.card]}>
-            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>НАСТРОЙКИ НАПОМИНАНИЯ</Text>
-
-            {/* Пробег */}
-            <View style={styles.optionRow}>
-                <View style={styles.optionInfo}>
-                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Пробег</Text>
-                <Text style={[styles.optionDescription, adaptiveStyles.textXs]}>Уведомление по пробегу</Text>
-                </View>
-                <Switch
-                value={selectedOptions.пробег}
-                onValueChange={() => toggleOption('пробег')}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={selectedOptions.пробег ? '#007AFF' : '#f4f3f4'}
-                />
-            </View>
-
-            {selectedOptions.пробег && (
-                <View style={styles.optionContent}>
+            {noticeType === 'mileage' && (
                 <TextInput
-                    style={[styles.input, adaptiveStyles.textSm]}
-                    placeholder="Пробег (км)"
-                    placeholderTextColor="#999"
-                    keyboardType="numeric"
-                    value={reminder.mileage}
-                    onChangeText={(text) => setReminder({ ...reminder, mileage: text })}
+                style={[styles.input, adaptiveStyles.textSm]}
+                placeholder="Пробег, км"
+                keyboardType="numeric"
+                value={mileageNotice}
+                onChangeText={setMileageNotice}
                 />
-                </View>
             )}
 
-            {/* Время */}
-            <View style={styles.optionRow}>
-                <View style={styles.optionInfo}>
-                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Время</Text>
-                <Text style={[styles.optionDescription, adaptiveStyles.textXs]}>Уведомление по дате</Text>
-                </View>
-                <Switch
-                value={selectedOptions.время}
-                onValueChange={() => toggleOption('время')}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={selectedOptions.время ? '#007AFF' : '#f4f3f4'}
-                />
-            </View>
-
-            {selectedOptions.время && (
-                <View style={styles.optionContent}>
+            {noticeType === 'date' && (
+                <>
                 <TextInput
                     style={[styles.input, adaptiveStyles.textSm]}
-                    placeholder="Дата события (ГГГГ-ММ-ДД)"
-                    placeholderTextColor="#999"
-                    value={reminder.date}
-                    onChangeText={(text) => setReminder({ ...reminder, date: text })}
+                    placeholder="Дата (ГГГГ-ММ-ДД)"
+                    value={dateNotice}
+                    onChangeText={(raw) => {
+                    const cleaned = raw.replace(/[^\d-]/g, '');
+                    setDateNotice(cleaned);
+                    }}
                 />
-                </View>
-            )}
-
-            {/* Уведомление */}
-            <View style={styles.optionRow}>
-                <View style={styles.optionInfo}>
-                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Уведомление</Text>
-                <Text style={[styles.optionDescription, adaptiveStyles.textXs]}>Push-уведомление перед событием</Text>
-                </View>
-                <Switch
-                value={selectedOptions.уведомление}
-                onValueChange={() => toggleOption('уведомление')}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={selectedOptions.уведомление ? '#007AFF' : '#f4f3f4'}
-                />
-            </View>
-
-            {selectedOptions.уведомление && selectedOptions.время && (
-                <View style={styles.optionContent}>
-                <TextInput
-                    style={[styles.input, adaptiveStyles.textSm]}
-                    placeholder="Дата уведомления (рассчитана автоматически)"
-                    placeholderTextColor="#999"
-                    value={reminder.noticeDate}
-                    editable={false}
-                />
-                <Text style={[styles.hint, adaptiveStyles.textXs]}>
-                    Уведомление придет за 7 дней до события
-                </Text>
-                </View>
+                {dateNotice && (
+                    <Text style={[styles.hint, adaptiveStyles.textXs]}>
+                    {safeDate(dateNotice) || 'Некорректная дата'}
+                    </Text>
+                )}
+                </>
             )}
             </View>
 
-            {/* Статус напоминания */}
+            {/* Статус */}
             <View style={[styles.section, adaptiveStyles.card]}>
             <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>СТАТУС</Text>
             <View style={styles.optionRow}>
                 <View style={styles.optionInfo}>
-                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Активное напоминание</Text>
+                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Активно</Text>
                 <Text style={[styles.optionDescription, adaptiveStyles.textXs]}>Включить уведомления</Text>
                 </View>
                 <Switch
-                value={reminder.enabled}
-                onValueChange={(value) => setReminder({ ...reminder, enabled: value })}
+                value={enabled}
+                onValueChange={setEnabled}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={reminder.enabled ? '#007AFF' : '#f4f3f4'}
+                thumbColor={enabled ? '#007AFF' : '#f4f3f4'}
                 />
             </View>
             </View>
 
-            {/* Кнопка создания */}
+            {/* Кнопка */}
             <TouchableOpacity
-            style={[
-                styles.createButton, 
-                { backgroundColor: loading ? '#ccc' : '#007AFF' }
-            ]}
-            onPress={handleCreateReminder}
+            style={[styles.createButton, { backgroundColor: loading ? '#ccc' : '#007AFF' }]}
+            onPress={handleSave}
             disabled={loading}
             >
             <Text style={[styles.createButtonText, adaptiveStyles.textMd]}>
-                {loading ? 'Создание...' : 'Создать напоминание'}
+                {loading ? 'Сохранение...' : (isEditing ? 'Сохранить' : 'Создать')}
             </Text>
             </TouchableOpacity>
 
-            {/* Отступ для таб-бара */}
             <View style={{ height: 20 }} />
         </ScrollView>
         </SafeAreaView>
     );
     }
 
-    // Стили остаются без изменений
+    // Стили
     const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    scrollContent: {
-        padding: 16,
-        paddingBottom: 20,
-    },
-    title: {
-        textAlign: 'center',
-        marginBottom: 24,
-        color: '#1a1a1a',
-    },
-    section: {
-        padding: 16,
-        marginBottom: 16,
-        backgroundColor: 'white',
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    sectionTitle: {
-        fontWeight: '600',
-        marginBottom: 16,
-        color: '#666',
-        textTransform: 'uppercase',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#dddddd',
-        borderRadius: 8,
-        padding: 12,
-        backgroundColor: '#f8f8f8',
-        marginBottom: 12,
-    },
-    typeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 8,
-    },
-    typeLabel: {
-        marginRight: 16,
-        color: '#333',
-        fontWeight: '500',
-    },
-    typeButtons: {
-        gap: 8,
-    },
-    typeButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-    },
-    typeButtonSelected: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
-    },
-    typeButtonText: {
-        color: '#666',
-        fontWeight: '500',
-    },
-    typeButtonTextSelected: {
-        color: 'white',
-    },
-    optionRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-    },
-    optionInfo: {
-        flex: 1,
-        marginRight: 16,
-    },
-    optionTitle: {
-        marginBottom: 4,
-        color: '#1a1a1a',
-        fontWeight: '500',
-    },
-    optionDescription: {
-        color: '#666',
-    },
-    optionContent: {
-        marginTop: 8,
-        marginBottom: 8,
-    },
-    createButton: {
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-        marginTop: 8,
-        shadowColor: '#007AFF',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-    createButtonText: {
-        fontWeight: '600',
-        color: 'white',
-    },
-    hint: {
-        color: '#666',
-        fontStyle: 'italic',
-        marginTop: 4,
-    },
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    scrollContent: { padding: 16, paddingBottom: 20 },
+    title: { textAlign: 'center', marginBottom: 24, color: '#1a1a1a', fontWeight: 'bold' },
+    section: { padding: 16, marginBottom: 16, backgroundColor: 'white', borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
+    sectionTitle: { fontWeight: '600', marginBottom: 12, color: '#666', textTransform: 'uppercase' },
+    input: { borderWidth: 1, borderColor: '#dddddd', borderRadius: 8, padding: 12, backgroundColor: '#f8f8f8', marginBottom: 8 },
+    optionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    optionInfo: { flex: 1, marginRight: 16 },
+    optionTitle: { color: '#1a1a1a', fontWeight: '500' },
+    optionDescription: { color: '#666', fontSize: 12 },
+    tagButton: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 16, borderWidth: 1, borderColor: '#ccc', marginRight: 8 },
+    tagSelected: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
+    tagText: { color: '#666', fontSize: 14 },
+    tagTextSelected: { color: '#fff' },
+    miniButton: { paddingVertical: 4, paddingHorizontal: 10, borderRadius: 6, borderWidth: 1, borderColor: '#ccc' },
+    miniSelected: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
+    miniText: { color: '#666', fontSize: 12 },
+    miniTextSelected: { color: '#fff' },
+    createButton: { paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginTop: 8, shadowColor: '#007AFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
+    createButtonText: { fontWeight: '600', color: 'white' },
+    hint: { color: '#666', fontStyle: 'italic', marginTop: 4 },
+    subtitle: {textAlign: 'center', marginBottom: 16, color: '#666', fontSize: 14, },
     });

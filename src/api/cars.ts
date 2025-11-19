@@ -4,8 +4,8 @@
     export const carsAPI = {
         // GET /cars - получить список автомобилей
         list: () => {
-            console.log('📤 GET запрос на: /cars');
-            return api.get<{ cars: Car[] }>('/cars').then((r) => r.data.cars);
+        console.log('📤 GET запрос на: /cars');
+        return api.get<{ cars: Car[] }>('/cars').then((r) => r.data.cars);
         },
         
         // POST /cars/create - создать автомобиль
@@ -22,7 +22,7 @@
         
         // DELETE /cars/:id - удалить автомобиль
         delete: (id: string) => {
-            const correctEndpoint = `/cars/${id}`; // ЗАМЕНИТЕ НА ПРАВИЛЬНЫЙ
+            const correctEndpoint = `/cars/${id}`; 
             console.log('📤 DELETE запрос на:', correctEndpoint);
             return api.delete<void>(correctEndpoint).then(() => null);
         },

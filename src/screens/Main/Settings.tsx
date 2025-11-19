@@ -16,9 +16,9 @@
     import { useNavigation } from '@react-navigation/native';
     import { StackNavigationProp } from '@react-navigation/stack';
     import { RootStackParamList } from '../../types/navigation';
+    import { Reminder, remindersAPI } from '../../api/reminders';
 
     type NavProp = StackNavigationProp<RootStackParamList>;
-
     export default function Settings() {
         const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet } = useAdaptiveStyles();
         const { theme, toggleTheme } = useTheme();

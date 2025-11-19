@@ -5,12 +5,14 @@
     import CarModels from '../screens/Garage/CarModels';
     import CarGeneration from '../screens/Garage/CarGeneration';
     import CarDetailsForm from '../screens/Garage/CarDetailsForm';
+    import SelectCarForReminder from '../screens/Main/SelectCarForReminder';
 
     export type AddCarStackParamList = {
     AddCar: undefined;
     CarModels: { brand: string };
     CarGeneration: { brand: string; model: string };
     CarDetailsForm: { brand: string; model: string; generation: string };
+    SelectCarForReminder: undefined;
     };
 
     const Stack = createStackNavigator<AddCarStackParamList>();
@@ -22,6 +24,7 @@
         <Stack.Screen name="CarModels" component={CarModels} />
         <Stack.Screen name="CarGeneration" component={CarGeneration} />
         <Stack.Screen name="CarDetailsForm" component={CarDetailsForm} />
+        <Stack.Screen name="SelectCarForReminder" component={SelectCarForReminder} />
         </Stack.Navigator>
     );
     }

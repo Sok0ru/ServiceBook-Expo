@@ -16,14 +16,14 @@
       Filters: undefined;
       CreateReminder: { carId: string; editReminder?: Reminder };
       Garage: undefined;
-      History: undefined;
+      History: { carId: string };
       CarDetails: { carId: string };
       AddCarStackNavigator:undefined;
       LogIn:undefined;
       TestNotifications:undefined;
       CarModels: { brand: string };
       CarGeneration: { brand: string; model: string };
-      
+      SelectCarForReminder: undefined;
 
     };
     export type MainTabParamList = {
@@ -44,6 +44,7 @@
       Garage:undefined;
     };
     export type Car = {
+      name(name: any): unknown;
       id: string;
       brand: string;
       model: string;
@@ -62,3 +63,5 @@
         interface RootParamList extends RootStackParamList {}
       }
     }
+
+export { Reminder };

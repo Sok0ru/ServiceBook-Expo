@@ -50,11 +50,9 @@
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
     const { scheduleReminder, cancelReminder } = useNotification();
 
-    const carId = route.params?.carId || ''; 
+    const carId = route.params?.carId;
     if (!carId) {
-    Alert.alert('Ошибка', 'Не выбрана машина');
-    nav.goBack();
-    return;
+    console.warn('⚠️ carId не передан в Reminders');
     }
     const isEditing = Boolean(route.params?.editReminder);
     const editReminder = route.params?.editReminder as Reminder | undefined;
@@ -75,9 +73,9 @@
         const cars = await carsAPI.list();
         const car = cars.find(c => c.id === carId);
         if (car) setCarName(`${car.brand} ${car.model}`);
-    };
+    }
     if (carId) loadCar();
-        }, [isEditing, editReminder]);
+        }, [isEditing, editReminder, carId]);
 
     /* --------- handlers ---------- */
         const token = getToken();
@@ -90,6 +88,9 @@
         if (!name.trim()) return Alert.alert('Ошибка', 'Введите название');
         const finalTag = tag === 'Свой вариант' ? customTag.trim() : tag;
         if (!finalTag) return Alert.alert('Ошибка', 'Выберите или введите тег');
+        Alert.alert('Успех', `Напоминание ${isEditing ? 'обновлено' : 'создано'}!`, [
+        { text: 'OK', onPress: () => nav.navigate('Reminders', { carId }) },
+        ]);
 
         const data: CreateReminderData = {
         name,

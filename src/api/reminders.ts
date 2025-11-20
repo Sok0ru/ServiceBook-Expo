@@ -34,5 +34,6 @@
         api.delete(`/details/notice/${carId}/${id}`).then(() => null),
 
     getByCar: (carId: string) =>
-        api.get<Reminder[]>(`/details/${carId}`).then(r => r.data),
+        api.get<Reminder[] | { data: Reminder[] } | { cars: Reminder[] } | { reminders: Reminder[] }>(`/details/${carId}`)
+        .then(r => r.data),
     };

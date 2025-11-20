@@ -43,17 +43,16 @@
       CarDetailsForm: { brand: string; model: string; generation: string };
       Garage:undefined;
     };
-    export type Car = {
-      name(name: any): unknown;
+  export interface Car {
       id: string;
       brand: string;
       model: string;
-      vin?: string;
       year?: number;
       mileage?: number;
-      color?: string;
+      vin?: string;
       plate?: string;
-    };
+      color?: string;
+  }
     export type Brand = {
       id: string;
       name: string;

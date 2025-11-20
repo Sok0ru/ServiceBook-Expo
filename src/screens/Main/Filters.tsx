@@ -29,27 +29,27 @@
 
     const [filters, setFilters] = useState({
         sorting: {
-        enabled: true,
+        active: true,
         type: 'А-Я' as 'А-Я' | 'Я-А' | 'Что-то ещё',
         },
         test: {
-        enabled: true,
+        active: true,
         usbBsaSs: false,
         },
         mileage: {
-        enabled: true,
+        active: true,
         min: '100',
         max: '1000000',
         selectedLine: 0,
         },
         condition: {
-        enabled: true,
+        active: true,
         Критично: false,
         Внимание: false,
         Исправно: false,
         },
         time: {
-        enabled: false,
+        active: false,
         min: '5',
         max: '100',
         selectedLine: 0,
@@ -61,7 +61,7 @@
         ...filters,
         [filterKey]: {
             ...filters[filterKey],
-            enabled: !filters[filterKey].enabled,
+            active: !filters[filterKey].active,
         },
         });
     };
@@ -72,11 +72,11 @@
 
     const resetFilters = () => {
         setFilters({
-        sorting: { enabled: true, type: 'А-Я' },
-        test: { enabled: true, usbBsaSs: false },
-        mileage: { enabled: true, min: '100', max: '1000000', selectedLine: 0 },
-        condition: { enabled: true, Критично: false, Внимание: false, Исправно: false },
-        time: { enabled: false, min: '5', max: '100', selectedLine: 0 },
+        sorting: { active: true, type: 'А-Я' },
+        test: { active: true, usbBsaSs: false },
+        mileage: { active: true, min: '100', max: '1000000', selectedLine: 0 },
+        condition: { active: true, Критично: false, Внимание: false, Исправно: false },
+        time: { active: false, min: '5', max: '100', selectedLine: 0 },
         });
     };
 
@@ -92,15 +92,15 @@
             <View style={[styles.filterSection, adaptiveStyles.card]}>
             <View style={styles.filterHeader}>
                 <Switch
-                value={filters.sorting.enabled}
+                value={filters.sorting.active}
                 onValueChange={() => toggleFilter('sorting')}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={filters.sorting.enabled ? '#007AFF' : '#f4f3f4'}
+                thumbColor={filters.sorting.active ? '#007AFF' : '#f4f3f4'}
                 />
                 <Text style={[styles.filterTitle, adaptiveStyles.textMd]}>Сортировка</Text>
             </View>
 
-            {filters.sorting.enabled && (
+            {filters.sorting.active && (
                 <View
                 style={[
                     styles.optionsContainer,
@@ -139,15 +139,15 @@
             <View style={[styles.filterSection, adaptiveStyles.card]}>
             <View style={styles.filterHeader}>
                 <Switch
-                value={filters.test.enabled}
+                value={filters.test.active}
                 onValueChange={() => toggleFilter('test')}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={filters.test.enabled ? '#007AFF' : '#f4f3f4'}
+                thumbColor={filters.test.active ? '#007AFF' : '#f4f3f4'}
                 />
                 <Text style={[styles.filterTitle, adaptiveStyles.textMd]}>Теги</Text>
             </View>
 
-            {filters.test.enabled && (
+            {filters.test.active && (
                 <TouchableOpacity
                 style={styles.checkboxOption}
                 onPress={() =>
@@ -172,15 +172,15 @@
             <View style={[styles.filterSection, adaptiveStyles.card]}>
             <View style={styles.filterHeader}>
                 <Switch
-                value={filters.mileage.enabled}
+                value={filters.mileage.active}
                 onValueChange={() => toggleFilter('mileage')}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={filters.mileage.enabled ? '#007AFF' : '#f4f3f4'}
+                thumbColor={filters.mileage.active ? '#007AFF' : '#f4f3f4'}
                 />
                 <Text style={[styles.filterTitle, adaptiveStyles.textMd]}>Пробег</Text>
             </View>
 
-            {filters.mileage.enabled && (
+            {filters.mileage.active && (
                 <View style={styles.rangeContainer}>
                 <View style={styles.rangeInputs}>
                     <View style={styles.rangeInput}>
@@ -253,15 +253,15 @@
             <View style={[styles.filterSection, adaptiveStyles.card]}>
             <View style={styles.filterHeader}>
                 <Switch
-                value={filters.condition.enabled}
+                value={filters.condition.active}
                 onValueChange={() => toggleFilter('condition')}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={filters.condition.enabled ? '#007AFF' : '#f4f3f4'}
+                thumbColor={filters.condition.active ? '#007AFF' : '#f4f3f4'}
                 />
                 <Text style={[styles.filterTitle, adaptiveStyles.textMd]}>Состояние</Text>
             </View>
 
-            {filters.condition.enabled && (
+            {filters.condition.active && (
                 <View style={styles.optionsContainer}>
                 {[
                     { key: 'Критично', label: 'Критично' },
@@ -298,15 +298,15 @@
             <View style={[styles.filterSection, adaptiveStyles.card]}>
             <View style={styles.filterHeader}>
                 <Switch
-                value={filters.time.enabled}
+                value={filters.time.active}
                 onValueChange={() => toggleFilter('time')}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={filters.time.enabled ? '#007AFF' : '#f4f3f4'}
+                thumbColor={filters.time.active ? '#007AFF' : '#f4f3f4'}
                 />
                 <Text style={[styles.filterTitle, adaptiveStyles.textMd]}>Время</Text>
             </View>
 
-            {filters.time.enabled && (
+            {filters.time.active && (
                 <View style={styles.rangeContainer}>
                 <View style={styles.rangeInputs}>
                     <View style={styles.rangeInput}>

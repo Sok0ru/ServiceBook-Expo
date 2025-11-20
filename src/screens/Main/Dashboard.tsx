@@ -16,7 +16,8 @@
   import { StackNavigationProp } from '@react-navigation/stack';
   import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
   import { carsAPI } from '../../api/cars';
-  import { Car } from '../../types/navigation';
+  import { remindersAPI } from '../../api/reminders';
+  import { Car, Reminder } from '../../types/navigation';
 
   type MainStackParamList = {
     CarDetails: { carId: string };
@@ -31,16 +32,26 @@
     navigation: DashboardScreenNavigationProp;
   };
 
+  // Безопасный форматтер даты
+  const safeDate = (iso?: number): string => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime())
+      ? ''
+      : `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  };
+
   export default function Dashboard({ navigation }: Props) {
     const { adaptiveStyles, adaptiveValues, isSmallDevice, isTablet, width } = useAdaptiveStyles();
     const [cars, setCars] = useState<Car[]>([]);
     const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+    const [reminders, setReminders] = useState<Reminder[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showCarSelector, setShowCarSelector] = useState(false);
 
-    // Загружаем автомобили при монтировании
-    const loadCars = async () => {
+    // Загружаем автомобили и напоминания
+    const loadData = async () => {
       try {
         const data = await carsAPI.list();
         setCars(data);
@@ -57,9 +68,33 @@
       }
     };
 
+    // Загружаем напоминания для выбранного автомобиля
+
+    const loadReminders = async (carId: string) => {
+      try {
+        console.log('📥 Загружаю напоминания для carId:', carId);
+        const response = await remindersAPI.getByCar(carId);
+        console.log('📥 Ответ от remindersAPI.getByCar:', response);
+        
+        // Обработка ответа - напоминания в поле details
+        const remindersData = (response as any)?.details || [];
+        console.log('📋 Обработанные напоминания:', remindersData);
+        setReminders(remindersData);
+      } catch (e: any) {
+        console.error('❌ Ошибка загрузки напоминаний:', e);
+      }
+    };
+
     useEffect(() => {
-      loadCars();
+      loadData();
     }, []);
+
+    // При изменении выбранного автомобиля загружаем его напоминания
+    useEffect(() => {
+      if (selectedCar) {
+        loadReminders(selectedCar.id);
+      }
+    }, [selectedCar]);
 
     const handleRemindersPress = () => {
       if (!selectedCar) {
@@ -73,7 +108,10 @@
 
     const handleRefresh = () => {
       setRefreshing(true);
-      loadCars();
+      loadData();
+      if (selectedCar) {
+        loadReminders(selectedCar.id);
+      }
     };
 
     const handleCarTitlePress = () => {
@@ -88,9 +126,11 @@
       }
     };
 
-    const handleCarSelect = (car: Car) => {
+    const handleCarSelect = async (car: Car) => {
       setSelectedCar(car);
       setShowCarSelector(false);
+      // Загружаем напоминания для нового выбранного автомобиля
+      await loadReminders(car.id);
     };
 
     const handleAddCar = () => {
@@ -102,23 +142,20 @@
       minute: '2-digit',
     });
 
-    const components = [
-      {
-        id: 1,
-        name: 'Топливные форсунки системы непосредственного впрыска',
-        status: 'требуется замена или ремонт',
-      },
-      {
-        id: 2,
-        name: 'Соленоид управления фазой газораспределения',
-        status: 'требуется замена или ремонт',
-      },
-      {
-        id: 3,
-        name: 'Ступица переднего колеса с подшипником',
-        status: 'требуется замена или ремонт',
-      },
-    ];
+    // Активные напоминания (первые 3)
+    const activeReminders = reminders
+      .filter(r => r.active)
+      .slice(0, 3);
+
+    // Ближайшее напоминание по пробегу
+    const nearestMileageReminder = reminders
+      .filter(r => r.active && r.noticeType === 'mileage' && r.mileageNotice)
+      .sort((a, b) => (a.mileageNotice || 0) - (b.mileageNotice || 0))[0];
+
+    // Ближайшее напоминание по дате
+    const nearestDateReminder = reminders
+      .filter(r => r.active && r.noticeType === 'date' && r.dateNotice)
+      .sort((a, b) => (a.dateNotice || 0) - (b.dateNotice || 0))[0];
 
     if (loading) {
       return (
@@ -204,35 +241,61 @@
                   </View>
                 </View>
 
-                {/* Компоненты требующие внимания */}
+                {/* Активные напоминания */}
                 <View style={styles.issuesSection}>
-                  <Text style={[styles.sectionTitle, adaptiveStyles.textMd]}>ТРЕБУЕТ ВНИМАНИЯ</Text>
-                  {components.map((component) => (
-                    <View key={component.id} style={styles.issueItem}>
-                      <Text
-                        style={[styles.issueText, adaptiveStyles.textSm]}
-                        numberOfLines={isSmallDevice ? 2 : 3}
-                        ellipsizeMode="tail"
-                      >
-                        {component.name}
-                      </Text>
-                      <Text
-                        style={[styles.issueStatus, adaptiveStyles.textXs]}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {component.status}
-                      </Text>
-                    </View>
-                  ))}
+                  <Text style={[styles.sectionTitle, adaptiveStyles.textMd]}>
+                    АКТИВНЫЕ НАПОМИНАНИЯ ({activeReminders.length})
+                  </Text>
+                  {activeReminders.length > 0 ? (
+                    activeReminders.map((reminder) => (
+                      <View key={reminder.id} style={styles.issueItem}>
+                        <Text
+                          style={[styles.issueText, adaptiveStyles.textSm]}
+                          numberOfLines={isSmallDevice ? 2 : 3}
+                          ellipsizeMode="tail"
+                        >
+                          {reminder.name}
+                        </Text>
+                        <Text
+                          style={[styles.issueStatus, adaptiveStyles.textXs]}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {reminder.noticeType === 'mileage' 
+                            ? `${reminder.mileageNotice?.toLocaleString()} км`
+                            : safeDate(reminder.dateNotice)
+                          }
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={[styles.noRemindersText, adaptiveStyles.textSm]}>
+                      Нет активных напоминаний
+                    </Text>
+                  )}
                 </View>
 
-                {/* Критичное уведомление */}
-                <View style={styles.criticalSection}>
-                  <Text style={[styles.criticalTitle, adaptiveStyles.textMd]}> СРОЧНОЕ ОБСЛУЖИВАНИЕ</Text>
-                  <Text style={[styles.criticalSubtitle, adaptiveStyles.textSm]}>Замена масла двигателя</Text>
-                  <Text style={[styles.criticalInfo, adaptiveStyles.textXs]}>Следующая замена: 5,000 км</Text>
-                </View>
+                {/* Ближайшее напоминание */}
+                {(nearestMileageReminder || nearestDateReminder) && (
+                  <View style={styles.criticalSection}>
+                    <Text style={[styles.criticalTitle, adaptiveStyles.textMd]}>⚡ БЛИЖАЙШЕЕ ОБСЛУЖИВАНИЕ</Text>
+                    {nearestMileageReminder && (
+                      <Text style={[styles.criticalSubtitle, adaptiveStyles.textSm]}>
+                        {nearestMileageReminder.name}
+                      </Text>
+                    )}
+                    {nearestMileageReminder && (
+                      <Text style={[styles.criticalInfo, adaptiveStyles.textXs]}>
+                        При пробеге: {nearestMileageReminder.mileageNotice?.toLocaleString()} км
+                      </Text>
+                    )}
+                    {nearestDateReminder && !nearestMileageReminder && (
+                      <Text style={[styles.criticalInfo, adaptiveStyles.textXs]}>
+                        Дата: {safeDate(nearestDateReminder.dateNotice)}
+                      </Text>
+                    )}
+                  </View>
+                )}
               </TouchableOpacity>
             </View>
           ) : (
@@ -256,15 +319,31 @@
               isTablet && styles.statsGridTablet
             ]}>
               <View style={[styles.statCard, adaptiveStyles.card]}>
-                <Text style={[styles.statTitle, adaptiveStyles.textMd]}>Статистика ТО</Text>
-                <Text style={[styles.statValue, adaptiveStyles.textSm]}>Последнее: 2 недели назад</Text>
-                <Text style={[styles.statValue, adaptiveStyles.textSm]}>Следующее: через 3,000 км</Text>
+                <Text style={[styles.statTitle, adaptiveStyles.textMd]}>Статистика напоминаний</Text>
+                <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                  Активных: {reminders.filter(r => r.active).length}
+                </Text>
+                <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                  Всего: {reminders.length}
+                </Text>
               </View>
 
               <View style={[styles.statCard, adaptiveStyles.card]}>
-                <Text style={[styles.statTitle, adaptiveStyles.textMd]}>Расходы</Text>
-                <Text style={[styles.statValue, adaptiveStyles.textSm]}>За месяц: 5,430 ₽</Text>
-                <Text style={[styles.statValue, adaptiveStyles.textSm]}>За год: 64,150 ₽</Text>
+                <Text style={[styles.statTitle, adaptiveStyles.textMd]}>Следующее ТО</Text>
+                {nearestMileageReminder ? (
+                  <>
+                    <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                      {nearestMileageReminder.mileageNotice?.toLocaleString()} км
+                    </Text>
+                    <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                      {nearestMileageReminder.name}
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                    Не запланировано
+                  </Text>
+                )}
               </View>
             </View>
           )}
@@ -676,5 +755,11 @@
     modalCloseText: {
       color: '#fff',
       fontWeight: '600',
+    },
+    noRemindersText: {
+      color: '#666',
+      fontStyle: 'italic',
+      textAlign: 'center',
+      paddingVertical: 8,
     },
   });

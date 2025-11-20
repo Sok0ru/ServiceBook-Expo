@@ -1,3 +1,4 @@
+    // src/screens/Main/CreateReminder.tsx
     import React, { useState, useEffect } from 'react';
     import {
     View,
@@ -49,139 +50,121 @@
     const route = useRoute<RoutePropT>();
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
     const { scheduleReminder, cancelReminder } = useNotification();
+    
 
     const carId = route.params?.carId;
     if (!carId) {
-    console.warn('⚠️ carId не передан в Reminders');
+        console.warn('⚠️ carId не передан в Reminders');
     }
+
     const isEditing = Boolean(route.params?.editReminder);
     const editReminder = route.params?.editReminder as Reminder | undefined;
 
-    /* --------- state ---------- */
     const [name, setName] = useState('');
     const [tag, setTag] = useState('');
     const [customTag, setCustomTag] = useState('');
     const [noticeType, setNoticeType] = useState<NoticeType>('date');
     const [mileageNotice, setMileageNotice] = useState('');
     const [dateNotice, setDateNotice] = useState('');
-    const [enabled, setEnabled] = useState(true);
+    const [active, setActive] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    /* --------- preload ---------- */
     useEffect(() => {
-    const loadCar = async () => {
-        const cars = await carsAPI.list();
-        const car = cars.find(c => c.id === carId);
-        if (car) setCarName(`${car.brand} ${car.model}`);
-    }
-    if (carId) loadCar();
-        }, [isEditing, editReminder, carId]);
-
-    /* --------- handlers ---------- */
-        const token = getToken();
-        if (!token) {
+        if (isEditing && editReminder) {
+            setName(editReminder.name || '');
+            setTag(editReminder.tag || '');
+            setNoticeType(editReminder.noticeType || 'date'); 
+            setMileageNotice(editReminder.mileageNotice?.toString() || '');
+            setDateNotice(editReminder.dateNotice ? new Date(editReminder.dateNotice).toISOString().split('T')[0] : '');
+            setActive(editReminder.active ?? true); 
+        }
+    }, [isEditing, editReminder]);
+    const token = getToken();
+    if (!token) {
         Alert.alert('Ошибка', 'Вы не авторизованы. Войдите в аккаунт');
         nav.navigate('LogIn');
-        return;
-        }
+        return null;
+    }
+
     const handleSave = async () => {
         if (!name.trim()) return Alert.alert('Ошибка', 'Введите название');
         const finalTag = tag === 'Свой вариант' ? customTag.trim() : tag;
         if (!finalTag) return Alert.alert('Ошибка', 'Выберите или введите тег');
-        Alert.alert('Успех', `Напоминание ${isEditing ? 'обновлено' : 'создано'}!`, [
-        { text: 'OK', onPress: () => nav.navigate('Reminders', { carId }) },
-        ]);
+
+        const mileageNoticeValue = noticeType === 'mileage' ? parseInt(mileageNotice) || 0 : undefined;
+        const dateNoticeValue = noticeType === 'date' && dateNotice ? new Date(dateNotice).getTime() : undefined;
+
+        const activeValue = isEditing ? (editReminder?.active ?? true) : active;
 
         const data: CreateReminderData = {
-        name,
-        tag: finalTag,
-        noticeType,
-        mileageNotice: noticeType === 'mileage' ? parseInt(mileageNotice) || 0 : undefined,
-        dateNotice: noticeType === 'date' && dateNotice ? new Date(dateNotice).getTime() : undefined,
-        enabled,
-        };
-        console.log('📤 POST /api/details/{carId}', {
-            carId,
-            body: {
-            name,
+            name: name.trim(),
             tag: finalTag,
-            noticeType,
-            mileageNotice: noticeType === 'mileage' ? parseInt(mileageNotice) || 0 : undefined,
-            dateNotice: noticeType === 'date' && dateNotice ? new Date(dateNotice).getTime() : undefined,
-            enabled,
-            },
-        });
-        console.log('📤 Создаю для carId:', carId, data);
+            noticeType: noticeType,
+            mileageNotice: mileageNoticeValue,
+            dateNotice: dateNoticeValue,
+            active: activeValue, 
+        };
 
-
+        console.log('📤 Данные для создания/обновления:', data);
+        
         setLoading(true);
         try {
-        if (isEditing && editReminder) {
-            const updated = await remindersAPI.update(carId, editReminder.id, data);
-            await cancelReminder(updated.id);
-            if (updated.enabled && updated.dateNotice) {
-            await scheduleReminder({
-                id: updated.id,
-                title: `Напоминание: ${updated.name}`,
-                message: `Пора проверить ${updated.name}`,
-                carId,
-                delaySeconds: Math.max(0, (updated.dateNotice - Date.now()) / 1000),
-            });
+            if (isEditing && editReminder) {
+                const updated = await remindersAPI.update(carId, editReminder.id, data);
+                await cancelReminder(updated.id);
+                if (updated.active && updated.dateNotice) {
+                    await scheduleReminder({
+                        id: updated.id,
+                        title: `Напоминание: ${updated.name}`,
+                        message: `Пора проверить ${updated.name}`,
+                        carId,
+                        delaySeconds: Math.max(0, (updated.dateNotice - Date.now()) / 1000),
+                    });
+                }
+                Alert.alert('Успех', 'Напоминание обновлено!', [
+                    { text: 'OK', onPress: () => nav.goBack() },
+                ]);
+            } else {
+                const created = await remindersAPI.create(carId, data);
+                console.log('✅ Созданное напоминание:', created);
+                if (created.active && created.dateNotice) {
+                    await scheduleReminder({
+                        id: created.id,
+                        title: `Напоминание: ${created.name}`,
+                        message: `Пора проверить ${created.name}`,
+                        carId,
+                        delaySeconds: Math.max(0, (created.dateNotice - Date.now()) / 1000),
+                    });
+                }
+                Alert.alert('Успех', 'Напоминание создано!', [
+                    { text: 'OK', onPress: () => nav.goBack() },
+                ]);
             }
-        } else {
-            const created = await remindersAPI.create(carId, data);
-            if (created.enabled && created.dateNotice) {
-            await scheduleReminder({
-                id: created.id,
-                title: `Напоминание: ${created.name}`,
-                message: `Пора проверить ${created.name}`,
-                carId,
-                delaySeconds: Math.max(0, (created.dateNotice - Date.now()) / 1000),
-            });
-            }
-        }
-        Alert.alert('Успех', `Напоминание ${isEditing ? 'обновлено' : 'создано'}!`, [
-            { text: 'OK', onPress: () => nav.goBack() },
-        ]);
         } catch (e: any) {
-            console.error('❌ Ответ сервера:', {
-            status: e.response?.status,
-            data: e.response?.data,
-            headers: e.response?.headers,
-            });
-            Alert.alert(
-            'Ошибка',
-            e.response?.data?.message || JSON.stringify(e.response?.data) || 'Не удалось сохранить'
-            );
+            console.error('❌ Ошибка сохранения:', e);
+            Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось сохранить');
         } finally {
             setLoading(false);
         }
-        };
-    console.log('📤 Создаю для carId:', carId); 
-    /* --------- UI ---------- */
+    };
+
+
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.subtitle}>{carName || 'Машина'}</Text>
+            <Text style={styles.subtitle}>{carName || 'Машина'}</Text>
             <Text style={[styles.title, adaptiveStyles.textXl]}>{isEditing ? 'Редактировать' : 'Создать'} напоминание</Text>
 
-            {/* Название */}
             <View style={[styles.section, adaptiveStyles.card]}>
             <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>НАЗВАНИЕ</Text>
-            <TextInput
-                style={[styles.input, adaptiveStyles.textSm]}
-                placeholder="Например, Замена масла"
-                value={name}
-                onChangeText={setName}
-            />
+            <TextInput style={[styles.input, adaptiveStyles.textSm]} placeholder="Например, Замена масла" value={name} onChangeText={setName} />
             </View>
 
-            {/* Тег */}
             <View style={[styles.section, adaptiveStyles.card]}>
             <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>ТЕГ</Text>
             <FlatList
                 data={[...PRESET_TAGS, 'Свой вариант']}
-                keyExtractor={(item) => item}
+                keyExtractor={item => item}
                 renderItem={({ item }) => (
                 <TouchableOpacity
                     style={[styles.tagButton, tag === item && styles.tagSelected]}
@@ -198,27 +181,17 @@
                 contentContainerStyle={{ gap: 8 }}
             />
             {tag === 'Свой вариант' && (
-                <TextInput
-                style={[styles.input, adaptiveStyles.textSm]}
-                placeholder="Введите свой тег"
-                value={customTag}
-                onChangeText={setCustomTag}
-                />
+                <TextInput style={[styles.input, adaptiveStyles.textSm]} placeholder="Введите свой тег" value={customTag} onChangeText={setCustomTag} />
             )}
             </View>
 
-            {/* Когда напомнить */}
             <View style={[styles.section, adaptiveStyles.card]}>
             <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>КОГДА НАПОМНИТЬ</Text>
             <View style={styles.optionRow}>
                 <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Тип</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                {(['mileage', 'date'] as const).map((t) => (
-                    <TouchableOpacity
-                    key={t}
-                    style={[styles.miniButton, noticeType === t && styles.miniSelected]}
-                    onPress={() => setNoticeType(t)}
-                    >
+                {(['mileage', 'date'] as const).map(t => (
+                    <TouchableOpacity key={t} style={[styles.miniButton, noticeType === t && styles.miniSelected]} onPress={() => setNoticeType(t)}>
                     <Text style={[styles.miniText, noticeType === t && styles.miniTextSelected]}>
                         {t === 'mileage' ? 'По пробегу' : 'По дате'}
                     </Text>
@@ -228,13 +201,7 @@
             </View>
 
             {noticeType === 'mileage' && (
-                <TextInput
-                style={[styles.input, adaptiveStyles.textSm]}
-                placeholder="Пробег, км"
-                keyboardType="numeric"
-                value={mileageNotice}
-                onChangeText={setMileageNotice}
-                />
+                <TextInput style={[styles.input, adaptiveStyles.textSm]} placeholder="Пробег, км" keyboardType="numeric" value={mileageNotice} onChangeText={setMileageNotice} />
             )}
 
             {noticeType === 'date' && (
@@ -243,43 +210,37 @@
                     style={[styles.input, adaptiveStyles.textSm]}
                     placeholder="Дата (ГГГГ-ММ-ДД)"
                     value={dateNotice}
-                    onChangeText={(raw) => {
+                    onChangeText={raw => {
                     const cleaned = raw.replace(/[^\d-]/g, '');
                     setDateNotice(cleaned);
                     }}
                 />
                 {dateNotice && (
-                    <Text style={[styles.hint, adaptiveStyles.textXs]}>
-                    {safeDate(dateNotice) || 'Некорректная дата'}
-                    </Text>
+                    <Text style={[styles.hint, adaptiveStyles.textXs]}>{safeDate(dateNotice) || 'Некорректная дата'}</Text>
                 )}
                 </>
             )}
             </View>
 
-            {/* Статус */}
+            {!isEditing && (
             <View style={[styles.section, adaptiveStyles.card]}>
-            <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>СТАТУС</Text>
-            <View style={styles.optionRow}>
+                <Text style={[styles.sectionTitle, adaptiveStyles.textXs]}>СТАТУС</Text>
+                <View style={styles.optionRow}>
                 <View style={styles.optionInfo}>
-                <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Активно</Text>
-                <Text style={[styles.optionDescription, adaptiveStyles.textXs]}>Включить уведомления</Text>
+                    <Text style={[styles.optionTitle, adaptiveStyles.textMd]}>Активно</Text>
+                    <Text style={[styles.optionDescription, adaptiveStyles.textXs]}>Включить уведомления</Text>
                 </View>
                 <Switch
-                value={enabled}
-                onValueChange={setEnabled}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={enabled ? '#007AFF' : '#f4f3f4'}
+                    value={active}
+                    onValueChange={setActive}
+                    trackColor={{ false: '#767577', true: '#81b0ff' }}
+                    thumbColor={active ? '#007AFF' : '#f4f3f4'}
                 />
+                </View>
             </View>
-            </View>
+            )}
 
-            {/* Кнопка */}
-            <TouchableOpacity
-            style={[styles.createButton, { backgroundColor: loading ? '#ccc' : '#007AFF' }]}
-            onPress={handleSave}
-            disabled={loading}
-            >
+            <TouchableOpacity style={[styles.createButton, { backgroundColor: loading ? '#ccc' : '#007AFF' }]} onPress={handleSave} disabled={loading}>
             <Text style={[styles.createButtonText, adaptiveStyles.textMd]}>
                 {loading ? 'Сохранение...' : (isEditing ? 'Сохранить' : 'Создать')}
             </Text>
@@ -291,12 +252,11 @@
     );
     }
 
-    // Стили
     const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
     scrollContent: { padding: 16, paddingBottom: 20 },
     title: { textAlign: 'center', marginBottom: 24, color: '#1a1a1a', fontWeight: 'bold' },
-    section: { padding: 16, marginBottom: 16, backgroundColor: 'white', borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
+    section: { padding: 16, marginBottom: 16, backgroundColor: 'white', borderRadius: 12, elevation: 3 },
     sectionTitle: { fontWeight: '600', marginBottom: 12, color: '#666', textTransform: 'uppercase' },
     input: { borderWidth: 1, borderColor: '#dddddd', borderRadius: 8, padding: 12, backgroundColor: '#f8f8f8', marginBottom: 8 },
     optionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
@@ -314,5 +274,5 @@
     createButton: { paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginTop: 8, shadowColor: '#007AFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
     createButtonText: { fontWeight: '600', color: 'white' },
     hint: { color: '#666', fontStyle: 'italic', marginTop: 4 },
-    subtitle: {textAlign: 'center', marginBottom: 16, color: '#666', fontSize: 14, },
+    subtitle: { textAlign: 'center', marginBottom: 16, color: '#666', fontSize: 14 },
     });

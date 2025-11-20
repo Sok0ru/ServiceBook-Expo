@@ -14,7 +14,7 @@
     import { StackNavigationProp } from '@react-navigation/stack';
     import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
     import { useAdaptiveStyles } from '../../hooks/useAdaptiveStyles';
-    import { RootStackParamList, Reminder } from '../../types/navigation';
+    import { RootStackParamList, Reminder, Car } from '../../types/navigation';
     import { remindersAPI } from '../../api/reminders';
     import { useNotification } from '../../contexts/NotificationContext';
     import { carsAPI } from '../../api/cars';
@@ -22,7 +22,6 @@
     type NavProp = StackNavigationProp<RootStackParamList, 'Reminders'>;
     type RoutePropT = RouteProp<RootStackParamList, 'Reminders'>;
 
-    /* ----------  безопасный форматтер  ---------- */
     const safeDate = (iso?: number): string => {
     if (!iso) return '';
     const d = new Date(iso);
@@ -38,10 +37,7 @@
     const { adaptiveStyles, isTablet } = useAdaptiveStyles();
     const { scheduleReminder, cancelReminder } = useNotification();
 
-    // Получаем carId из параметров навигации
     const carId = route.params?.carId;
-    
-    // Проверяем наличие carId
     if (!carId) {
         console.error('❌ carId не передан в Reminders');
         Alert.alert('Ошибка', 'Не выбран автомобиль');
@@ -52,49 +48,37 @@
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [cars, setCars] = useState<Car[]>([]); 
 
     const loadReminders = async () => {
         try {
-            setLoading(true);
-            //console.log('📥 Загружаю напоминания для carId:', carId);
-            
-            const response = await remindersAPI.getByCar(carId);
-            console.log('📥 Полный ответ от remindersAPI.getByCar:', response);
-            
-            // Обработка разных форматов ответа
-            let remindersData: Reminder[] = [];
-            
-            if (Array.isArray(response)) {
-            remindersData = response;
-            } else if (response && typeof response === 'object') {
-            // Основной случай - напоминания в поле "details"
-            if ('details' in response && Array.isArray(response.details)) {
-                remindersData = response.details;
-            } 
-            // Другие возможные форматы
-            else if ('data' in response && Array.isArray(response.data)) {
-                remindersData = response.data;
-            } else if ('reminders' in response && Array.isArray(response.reminders)) {
-                remindersData = response.reminders;
-            } else if ('cars' in response && Array.isArray(response.cars)) {
-                remindersData = response.cars;
-            }
-            }
-            
-            console.log('📋 Обработанные напоминания:', remindersData);
+        setLoading(true);
+        console.log('📥 Загружаю напоминания для carId:', carId);
+        
+        const response = await remindersAPI.getByCar(carId);
+        console.log('📥 Полный ответ от API:', JSON.stringify(response, null, 2));
+        
+        const remindersData = Array.isArray(response) ? response : [];
+        console.log('📋 Обработанные напоминания:', remindersData);
+
+        remindersData.forEach((reminder, index) => {
+            console.log(`🔍 Напоминание ${index + 1}:`, {
+                id: reminder.id,
+                name: reminder.name,
+                active: reminder.active,
+                hasActiveField: 'active' in reminder
+            });
+        });
+        
             setReminders(remindersData);
         } catch (e: any) {
-            console.error('❌ Ошибка загрузки напоминаний:', {
-            status: e.response?.status,
-            data: e.response?.data,
-            message: e.message
-            });
+            console.error('❌ Ошибка загрузки напоминаний:', e);
             Alert.alert('Ошибка', 'Не удалось загрузить напоминания');
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-        };
+    };
 
     useEffect(() => {
         const loadCarName = async () => {
@@ -113,39 +97,56 @@
             setCarName('Ошибка загрузки');
         }
         };
+
+        // ✅ ДОБАВЛЕНО: Загрузка списка всех машин
+        const loadAllCars = async () => {
+        try {
+            const carsData = await carsAPI.list();
+            setCars(carsData);
+        } catch (e) {
+            console.warn('Не удалось загрузить список машин', e);
+        }
+        };
         
         loadCarName();
         loadReminders();
+        loadAllCars(); 
     }, [carId]);
 
     const toggleReminder = async (r: Reminder) => {
-        const newEnabled = !r.enabled;
-
-        // Optimistic update
-        setReminders(prev =>
-        prev.map(item =>
-            item.id === r.id ? { ...item, enabled: newEnabled } : item
-        )
-        );
-
-        try {
-        const updated = await remindersAPI.update(carId, r.id, {
-            ...r,
-            enabled: newEnabled,
+        const newActive = !r.active;
+        console.log('🔘 Toggle reminder:', {
+            id: r.id,
+            name: r.name,
+            currentActive: r.active,
+            newActive: newActive
         });
 
-        // Подтверждение с сервера
-        setReminders(prev =>
-            prev.map(item => (item.id === r.id ? updated : item))
-        );
+        try {
+            // ✅ ПЕРЕДАЕМ НОВОЕ СОСТОЯНИЕ В ЗАПРОСЕ
+            await remindersAPI.active(carId, r.id, newActive);
+            
+            // Оптимистическое обновление
+            setReminders(prev =>
+                prev.map(item => 
+                    item.id === r.id 
+                        ? { ...item, active: newActive } 
+                        : item
+                )
+            );
+            
         } catch (e: any) {
-        Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось обновить');
-        // Откат при ошибке
-        setReminders(prev =>
-            prev.map(item =>
-            item.id === r.id ? { ...item, enabled: r.enabled } : item
-            )
-        );
+            console.error('❌ Ошибка переключения:', e);
+            Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось переключить состояние');
+            
+            // Откат
+            setReminders(prev =>
+                prev.map(item => 
+                    item.id === r.id 
+                        ? { ...item, active: r.active } 
+                        : item
+                )
+            );
         }
     };
 
@@ -181,8 +182,25 @@
         );
     }
 
-    const active = Array.isArray(reminders) ? reminders.filter(r => r.enabled) : [];
-    const inactive = Array.isArray(reminders) ? reminders.filter(r => !r.enabled) : [];
+    const handleCreateReminder = () => {
+        // ✅ ВСЕГДА ПЕРЕХОДИМ К ВЫБОРУ АВТОМОБИЛЯ
+        nav.navigate('SelectCarForReminder');
+    };
+
+    if (loading) {
+        return (    
+        <SafeAreaView style={styles.container}>
+            <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={[styles.loadingText, adaptiveStyles.textSm]}>Загрузка напоминаний...</Text>
+            </View>
+        </SafeAreaView>
+        );
+    }
+
+    const active = Array.isArray(reminders) ? reminders.filter(r => r.active) : [];
+    const inactive = Array.isArray(reminders) ? reminders.filter(r => !r.active) : [];
+
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -214,16 +232,16 @@
                 <View key={r.id} style={[styles.card, adaptiveStyles.card, isTablet && styles.cardTablet]}>
                     <View style={styles.rowBetween}>
                     <Text style={[styles.name, adaptiveStyles.textMd]} numberOfLines={2}>{r.name}</Text>
-                    <Switch value={r.enabled} onValueChange={() => toggleReminder(r)} />
+                    <Switch value={r.active} onValueChange={() => toggleReminder(r)} />
                     </View>
 
                     <View style={styles.detail}>
                     <Text style={styles.tag}>🏷 {r.tag}</Text>
                     {r.noticeType === 'mileage' && r.mileageNotice && (
-                        <Text style={styles.detail}>📏 {r.mileageNotice.toLocaleString()} км</Text>
+                        <Text style={styles.detail}> {r.mileageNotice.toLocaleString()} км</Text>
                     )}
                     {r.noticeType === 'date' && r.dateNotice && (
-                        <Text style={styles.detail}>📅 {safeDate(r.dateNotice)}</Text>
+                        <Text style={styles.detail}> {safeDate(r.dateNotice)}</Text>
                     )}
                     </View>
 
@@ -247,7 +265,7 @@
                 <View key={r.id} style={[styles.card, styles.inactive, adaptiveStyles.card, isTablet && styles.cardTablet]}>
                     <View style={styles.rowBetween}>
                     <Text style={[styles.nameInactive, adaptiveStyles.textMd]} numberOfLines={2}>{r.name}</Text>
-                    <Switch value={r.enabled} onValueChange={() => toggleReminder(r)} />
+                    <Switch value={r.active} onValueChange={() => toggleReminder(r)} />
                     </View>
                     <Text style={[styles.tagInactive, { color: '#aaa' }]}>🏷 {r.tag}</Text>
                 </View>
@@ -264,7 +282,7 @@
 
             <TouchableOpacity 
             style={[styles.createButton, { backgroundColor: '#007AFF' }]} 
-            onPress={() => nav.navigate('CreateReminder', { carId })}
+            onPress={handleCreateReminder} 
             >
             <Text style={[styles.createButtonText, adaptiveStyles.textMd]}>+ Создать напоминание</Text>
             </TouchableOpacity>

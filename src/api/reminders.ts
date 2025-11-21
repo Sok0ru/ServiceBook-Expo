@@ -8,6 +8,7 @@
         dateNotice?: number; 
         active: boolean;
         carId: string;
+        type: 'replace' | 'check'; 
     }
 
     export interface CreateReminderData {
@@ -17,6 +18,7 @@
         mileageNotice?: number;
         dateNotice?: number;
         active: boolean;
+        type: 'replace' | 'check'; 
     }
 
 export const remindersAPI = {
@@ -46,7 +48,8 @@ export const remindersAPI = {
                 noticeType: data.noticeType || null,
                 mileageNotice: data.mileageNotice !== null ? data.mileageNotice : undefined,
                 dateNotice: data.dateNotice !== null ? data.dateNotice : undefined,
-                active: data.active !== undefined ? data.active : true
+                active: data.active !== undefined ? data.active : true,
+                type: 'replace'
             };
             
             return updatedReminder;

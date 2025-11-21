@@ -93,7 +93,8 @@
                 mileageNotice: reminder.mileageNotice,
                 dateNotice: reminder.dateNotice,
                 active: true,
-                carId: ''
+                carId: '',
+                type: reminder.type 
             },
             });
         };

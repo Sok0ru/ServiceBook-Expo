@@ -1,4 +1,4 @@
-{/*
+    // src/services/notificationService.ts
     import * as Notifications from 'expo-notifications';
     import * as Device from 'expo-device';
     import { Platform } from 'react-native';
@@ -132,5 +132,4 @@
         console.error('❌ Ошибка отмены всех уведомлений:', error);
         }
     }
-   } 
-*/}
+    }

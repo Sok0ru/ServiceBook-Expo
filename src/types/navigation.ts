@@ -53,6 +53,14 @@
       plate?: string;
       color?: string;
   }
+    export interface ReminderWithCar extends Reminder {
+    car?: {
+      id: string;
+      brand: string;
+      model: string;
+      plate?: string;
+    };
+  }
     export type Brand = {
       id: string;
       name: string;

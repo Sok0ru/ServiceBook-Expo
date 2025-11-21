@@ -69,19 +69,28 @@
     };
 
     // Загружаем напоминания для выбранного автомобиля
-
     const loadReminders = async (carId: string) => {
       try {
         console.log('📥 Загружаю напоминания для carId:', carId);
         const response = await remindersAPI.getByCar(carId);
         console.log('📥 Ответ от remindersAPI.getByCar:', response);
         
-        // Обработка ответа - напоминания в поле details
-        const remindersData = (response as any)?.details || [];
+        // Исправленная обработка ответа
+        let remindersData: Reminder[] = [];
+        
+        if (Array.isArray(response)) {
+          // Если ответ - массив, используем его
+          remindersData = response;
+        } else if (response && typeof response === 'object') {
+          // Если ответ - объект, безопасно проверяем поле details
+          remindersData = (response as any)?.details || [];
+        }
+        
         console.log('📋 Обработанные напоминания:', remindersData);
         setReminders(remindersData);
       } catch (e: any) {
         console.error('❌ Ошибка загрузки напоминаний:', e);
+        setReminders([]);
       }
     };
 
@@ -129,7 +138,6 @@
     const handleCarSelect = async (car: Car) => {
       setSelectedCar(car);
       setShowCarSelector(false);
-      // Загружаем напоминания для нового выбранного автомобиля
       await loadReminders(car.id);
     };
 
@@ -242,19 +250,24 @@
                 </View>
 
                 {/* Активные напоминания */}
-                <View style={styles.issuesSection}>
-                  <Text style={[styles.sectionTitle, adaptiveStyles.textMd]}>
-                    АКТИВНЫЕ НАПОМИНАНИЯ ({activeReminders.length})
-                  </Text>
-                  {activeReminders.length > 0 ? (
-                    activeReminders.map((reminder) => (
-                      <View key={reminder.id} style={styles.issueItem}>
+            <View style={styles.issuesSection}>
+              <Text style={[styles.sectionTitle, adaptiveStyles.textMd]}>
+                АКТИВНЫЕ НАПОМИНАНИЯ ({activeReminders.length})
+              </Text>
+              {activeReminders.length > 0 ? (
+                activeReminders.map((reminder) => (
+                  <View key={reminder.id} style={styles.issueItem}>
+                    <View style={styles.issueContent}>
+                      <View style={styles.issueTextContainer}>
                         <Text
-                          style={[styles.issueText, adaptiveStyles.textSm]}
+                          style={[styles.issueName, adaptiveStyles.textSm]}
                           numberOfLines={isSmallDevice ? 2 : 3}
                           ellipsizeMode="tail"
                         >
                           {reminder.name}
+                        </Text>
+                        <Text style={[styles.issueTag, adaptiveStyles.textXs]}>
+                          🏷 {reminder.tag}
                         </Text>
                         <Text
                           style={[styles.issueStatus, adaptiveStyles.textXs]}
@@ -262,18 +275,20 @@
                           ellipsizeMode="tail"
                         >
                           {reminder.noticeType === 'mileage' 
-                            ? `${reminder.mileageNotice?.toLocaleString()} км`
-                            : safeDate(reminder.dateNotice)
+                            ? ` ${reminder.mileageNotice?.toLocaleString()} км`
+                            : ` ${safeDate(reminder.dateNotice)}`
                           }
                         </Text>
                       </View>
-                    ))
-                  ) : (
-                    <Text style={[styles.noRemindersText, adaptiveStyles.textSm]}>
-                      Нет активных напоминаний
-                    </Text>
-                  )}
-                </View>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <Text style={[styles.noRemindersText, adaptiveStyles.textSm]}>
+                  Нет активных напоминаний
+                </Text>
+              )}
+            </View>
 
                 {/* Ближайшее напоминание */}
                 {(nearestMileageReminder || nearestDateReminder) && (
@@ -337,6 +352,15 @@
                     </Text>
                     <Text style={[styles.statValue, adaptiveStyles.textSm]}>
                       {nearestMileageReminder.name}
+                    </Text>
+                  </>
+                ) : nearestDateReminder ? (
+                  <>
+                    <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                      {safeDate(nearestDateReminder.dateNotice)}
+                    </Text>
+                    <Text style={[styles.statValue, adaptiveStyles.textSm]}>
+                      {nearestDateReminder.name}
                     </Text>
                   </>
                 ) : (
@@ -447,319 +471,338 @@
     );
   }
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#f3f3f3ff',
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    loadingText: {
-      marginTop: 16,
-      color: '#666',
-    },
-    header: {
-      paddingVertical: 16,
-      paddingHorizontal: 16,
-      alignItems: 'center',
-      borderBottomWidth: 1,
-      borderBottomColor: '#e0e0e0',
-      backgroundColor: '#fff',
-    },
-    headerTitle: {
-      fontWeight: 'bold',
-      color: '#1a1a1a',
-    },
-    time: {
-      color: '#666',
-      marginTop: 4,
-    },
-    carCount: {
-      color: '#007AFF',
-      marginTop: 4,
-      fontWeight: '500',
-    },
-    content: {
-      flex: 1,
-    },
-    scrollContent: {
-      paddingVertical: 16,
-    },
-    carCard: {
-      padding: 20,
-      backgroundColor: '#fff',
-      borderRadius: 16,
-      marginBottom: 16,
-    },
-    carHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 16,
-    },
-    carTitleContainer: {
-      flex: 1,
-    },
-    carTitle: {
-      fontWeight: 'bold',
-      color: '#1a1a1a',
-    },
-    carSelectorHint: {
-      color: '#007AFF',
-      marginTop: 4,
-      fontStyle: 'italic',
-    },
-    statusBadge: {
-      backgroundColor: '#34C759',
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 12,
-      marginLeft: 12,
-    },
-    statusText: {
-      color: '#fff',
-      fontWeight: '600',
-    },
-    carInfoGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 12,
-      marginBottom: 20,
-    },
-    infoItem: {
-      minWidth: '45%',
-      flex: 1,
-    },
-    infoLabel: {
-      color: '#666',
-      fontWeight: '600',
-      marginBottom: 4,
-      textTransform: 'uppercase',
-    },
-    infoValue: {
-      color: '#1a1a1a',
-      fontWeight: '500',
-    },
-    issuesSection: {
-      marginBottom: 20,
-      paddingTop: 20,
-      borderTopWidth: 1,
-      borderTopColor: '#e0e0e0',
-    },
-    sectionTitle: {
-      fontWeight: 'bold',
-      marginBottom: 16,
-      color: '#1a1a1a',
-    },
-    issueItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 12,
-      paddingVertical: 8,
-    },
-    issueText: {
-      flex: 1,
-      marginRight: 12,
-      lineHeight: 20,
-      color: '#1a1a1a',
-    },
-    issueStatus: {
-      color: '#FF3B30',
-      fontWeight: '500',
-      flexShrink: 0,
-      maxWidth: '40%',
-    },
-    criticalSection: {
-      padding: 16,
-      backgroundColor: '#FFF3E0',
-      borderRadius: 12,
-      borderLeftWidth: 4,
-      borderLeftColor: '#FF9500',
-    },
-    criticalTitle: {
-      fontWeight: 'bold',
-      color: '#FF9500',
-      marginBottom: 4,
-    },
-    criticalSubtitle: {
-      color: '#FF9500',
-      marginBottom: 8,
-      fontWeight: '500',
-    },
-    criticalInfo: {
-      color: '#666',
-    },
-    addCarCard: {
-      padding: 40,
-      backgroundColor: '#fff',
-      borderRadius: 16,
-      marginBottom: 16,
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: '#e0e0e0',
-      borderStyle: 'dashed',
-    },
-    addCarIcon: {
-      marginBottom: 12,
-    },
-    addCarTitle: {
-      fontWeight: 'bold',
-      color: '#1a1a1a',
-      textAlign: 'center',
-      marginBottom: 8,
-    },
-    addCarSubtitle: {
-      color: '#666',
-      textAlign: 'center',
-      marginBottom: 20,
-    },
-    addCarButton: {
-      color: '#007AFF',
-      fontWeight: '600',
-      paddingVertical: 12,
-      paddingHorizontal: 24,
-      borderWidth: 2,
-      borderColor: '#007AFF',
-      borderRadius: 12,
-    },
-    // Статистика - горизонтально
-    statsGrid: {
-      flexDirection: 'row',
-      gap: 12,
-      marginBottom: 16,
-    },
-    statsGridTablet: {
-      gap: 16,
-    },
-    statCard: {
-      flex: 1,
-      padding: 16,
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: '#e0e0e0',
-      alignItems: 'center',
-    },
-    statIcon: {
-      marginBottom: 8,
-    },
-    statTitle: {
-      fontWeight: 'bold',
-      marginBottom: 8,
-      color: '#1a1a1a',
-      textAlign: 'center',
-    },
-    statValue: {
-      color: '#666',
-      marginBottom: 4,
-      textAlign: 'center',
-    },
-    // Быстрые действия
-    quickActions: {
-      marginBottom: 16,
-    },
-    actionButton: {
-      backgroundColor: '#fff',
-      padding: 20,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: '#e0e0e0',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 3,
-    },
-    actionButtonTablet: {
-      flex: 1,
-    },
-    actionIcon: {
-      marginBottom: 8,
-    },
-    actionText: {
-      fontWeight: '600',
-      color: '#1a1a1a',
-      textAlign: 'center',
-      marginBottom: 4,
-    },
-    actionDescription: {
-      color: '#666',
-      textAlign: 'center',
-    },
-    // Модальное окно выбора автомобиля
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
-    },
-    modalContent: {
-      backgroundColor: '#fff',
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 20,
-      maxHeight: '80%',
-    },
-    modalContentTablet: {
-      maxWidth: 500,
-      alignSelf: 'center',
-      borderRadius: 20,
-      width: '90%',
-    },
-    modalTitle: {
-      fontWeight: 'bold',
-      textAlign: 'center',
-      marginBottom: 20,
-      color: '#1a1a1a',
-    },
-    carList: {
-      maxHeight: 400,
-    },
-    carOption: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: '#f0f0f0',
-    },
-    carOptionSelected: {
-      backgroundColor: '#f8f9ff',
-    },
-    carOptionInfo: {
-      flex: 1,
-    },
-    carOptionTitle: {
-      fontWeight: '600',
-      color: '#1a1a1a',
-      marginBottom: 4,
-    },
-    carOptionDetails: {
-      color: '#666',
-    },
-    selectedIndicator: {
-      color: '#007AFF',
-      fontWeight: 'bold',
-    },
-    modalCloseButton: {
-      backgroundColor: '#007AFF',
-      padding: 16,
-      borderRadius: 12,
-      alignItems: 'center',
-      marginTop: 16,
-    },
-    modalCloseText: {
-      color: '#fff',
-      fontWeight: '600',
-    },
-    noRemindersText: {
-      color: '#666',
-      fontStyle: 'italic',
-      textAlign: 'center',
-      paddingVertical: 8,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f3f3f3ff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    color: '#666',
+  },
+  header: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#fff',
+  },
+  headerTitle: {
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  time: {
+    color: '#666',
+    marginTop: 4,
+  },
+  carCount: {
+    color: '#007AFF',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  content: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingVertical: 16,
+  },
+  carCard: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  carHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  carTitleContainer: {
+    flex: 1,
+  },
+  carTitle: {
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  carSelectorHint: {
+    color: '#007AFF',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  statusBadge: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 12,
+  },
+  statusText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  carInfoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 20,
+  },
+  infoItem: {
+    minWidth: '45%',
+    flex: 1,
+  },
+  infoLabel: {
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  infoValue: {
+    color: '#1a1a1a',
+    fontWeight: '500',
+  },
+  issuesSection: {
+    marginBottom: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#1a1a1a',
+  },
+  // ЗАМЕНЯЕМ СТИЛИ КАРТОЧЕК НАПОМИНАНИЙ - как в CarDetails
+  issueItem: {
+    padding: 16,
+    marginBottom: 12,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  issueContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  issueTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  issueName: {
+    fontWeight: '600',
+    marginBottom: 4,
+    color: '#1a1a1a',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  issueTag: {
+    marginBottom: 4,
+    color: '#007AFF',
+    fontSize: 12,
+  },
+  issueStatus: {
+    color: '#666',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  criticalSection: {
+    padding: 16,
+    backgroundColor: '#FFF3E0',
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF9500',
+  },
+  criticalTitle: {
+    fontWeight: 'bold',
+    color: '#FF9500',
+    marginBottom: 4,
+  },
+  criticalSubtitle: {
+    color: '#FF9500',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  criticalInfo: {
+    color: '#666',
+  },
+  addCarCard: {
+    padding: 40,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderStyle: 'dashed',
+  },
+  addCarIcon: {
+    marginBottom: 12,
+  },
+  addCarTitle: {
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  addCarSubtitle: {
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  addCarButton: {
+    color: '#007AFF',
+    fontWeight: '600',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    borderRadius: 12,
+  },
+  // Статистика - горизонтально
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  statsGridTablet: {
+    gap: 16,
+  },
+  statCard: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+  },
+  statIcon: {
+    marginBottom: 8,
+  },
+  statTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#1a1a1a',
+    textAlign: 'center',
+  },
+  statValue: {
+    color: '#666',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  // Быстрые действия
+  quickActions: {
+    marginBottom: 16,
+  },
+  actionButton: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  actionButtonTablet: {
+    flex: 1,
+  },
+  actionIcon: {
+    marginBottom: 8,
+  },
+  actionText: {
+    fontWeight: '600',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  actionDescription: {
+    color: '#666',
+    textAlign: 'center',
+  },
+  // Модальное окно выбора автомобиля
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalContentTablet: {
+    maxWidth: 500,
+    alignSelf: 'center',
+    borderRadius: 20,
+    width: '90%',
+  },
+  modalTitle: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#1a1a1a',
+  },
+  carList: {
+    maxHeight: 400,
+  },
+  carOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  carOptionSelected: {
+    backgroundColor: '#f8f9ff',
+  },
+  carOptionInfo: {
+    flex: 1,
+  },
+  carOptionTitle: {
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  carOptionDetails: {
+    color: '#666',
+  },
+  selectedIndicator: {
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  modalCloseButton: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  modalCloseText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  noRemindersText: {
+    color: '#666',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 8,
+  },
+});

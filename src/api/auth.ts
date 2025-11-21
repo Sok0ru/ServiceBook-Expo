@@ -18,4 +18,8 @@
 
     refresh: () =>
         api.get<{ jwt: JwtPair }>('/user/refresh').then((r) => r.data),
-    };
+
+    refreshTokens: (refreshToken: string) =>
+        api.post<{ jwt: JwtPair }>('/user/refresh', { refreshToken }).then(r => r.data),    
+};
+    

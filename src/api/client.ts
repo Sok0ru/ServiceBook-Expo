@@ -1,7 +1,8 @@
     import axios from 'axios';
     import Constants from 'expo-constants';
     import { Platform } from 'react-native';
-    import { getToken, setToken } from '../utils/tokenSync';
+    import { getToken, setToken, getRefreshToken, setRefreshToken, clearTokens } from '../utils/tokenSync';
+import { authAPI } from './auth';
 
     const BASE_URL =
     Constants.extra?.apiUrl ??
@@ -32,18 +33,34 @@
 
     /* -------------  response: 401 → refresh  ------------- */
     api.interceptors.response.use(
-    (res) => res,
-    async (err) => {
+    res => res,
+    async err => {
         const orig = err.config;
+
         if (err.response?.status === 401 && !orig._retry) {
         orig._retry = true;
-        try {
-            const { data } = await api.get<{ jwt: { accessToken: string; refreshToken: string } }>('/user/refresh');
-            setToken(data.jwt.accessToken);
-            return api(orig);
-        } catch {
-            setToken(null);
+
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+            await clearTokens();          // чистим и уходим
             return Promise.reject(err);
+        }
+
+        try {
+            // 1. Запрашиваем новую пару токенов refresh-токеном в теле
+            const { jwt } = await authAPI.refreshTokens(refreshToken);
+
+            // 2. Сохраняем их
+            await setToken(jwt.accessToken);
+            await setRefreshToken(jwt.refreshToken);
+
+            // 3. Подменяем заголовок и повторяем оригинальный запрос
+            orig.headers.Authorization = `Bearer ${jwt.accessToken}`;
+            return api(orig);
+        } catch (refreshErr) {
+            // refresh тоже протух – выкидываем пользователя
+            await clearTokens();
+            return Promise.reject(refreshErr);
         }
         }
         return Promise.reject(err);
